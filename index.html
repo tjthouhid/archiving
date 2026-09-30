@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Lifecycle — What to do / What not to do</title>
+  <style>
+    :root {
+      --bg: #f6f7f4;
+      --card: #ffffff;
+      --ink: #1a1f1c;
+      --muted: #5c675f;
+      --line: #d9e0da;
+      --do: #0f6b3c;
+      --do-bg: #e8f6ee;
+      --do-border: #9fd4b5;
+      --dont: #9b1c1c;
+      --dont-bg: #fdecec;
+      --dont-border: #f0b4b4;
+      --accent: #1d4e89;
+      --accent-soft: #e8eef7;
+      --warn: #8a5a00;
+      --warn-bg: #fff6e5;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(26, 31, 28, 0.06);
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, #eef5ff 0, transparent 28%),
+        radial-gradient(circle at top right, #edf8f1 0, transparent 24%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
+
+    header.hero {
+      background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%);
+      color: #fff;
+      border-radius: 22px;
+      padding: 28px 28px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    header.hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      letter-spacing: -0.02em;
+    }
+
+    header.hero p {
+      margin: 0;
+      opacity: 0.92;
+      max-width: 48rem;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      font-size: 0.85rem;
+    }
+
+    .banner-warn {
+      background: var(--warn-bg);
+      border: 1px solid #f0d59a;
+      color: var(--warn);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      font-weight: 600;
+    }
+
+    nav.toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    nav.toc a {
+      text-decoration: none;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      box-shadow: var(--shadow);
+    }
+
+    nav.toc a span {
+      display: block;
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.78rem;
+      margin-top: 2px;
+    }
+
+    section.phase {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      scroll-margin-top: 16px;
+    }
+
+    section.phase h2 {
+      margin: 0 0 6px;
+      font-size: 1.25rem;
+    }
+
+    section.phase .url {
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.86rem;
+      word-break: break-all;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      border-radius: 14px;
+      padding: 14px 14px 10px;
+      border: 1px solid;
+    }
+
+    .panel.do {
+      background: var(--do-bg);
+      border-color: var(--do-border);
+    }
+
+    .panel.dont {
+      background: var(--dont-bg);
+      border-color: var(--dont-border);
+    }
+
+    .panel h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel.do h3 { color: var(--do); }
+    .panel.dont h3 { color: var(--dont); }
+
+    .panel ul {
+      margin: 0;
+      padding: 0 0 0 1.1rem;
+    }
+
+    .panel li {
+      margin: 0 0 8px;
+      font-size: 0.92rem;
+    }
+
+    .checks {
+      margin-top: 16px;
+      border-top: 1px dashed var(--line);
+      padding-top: 14px;
+    }
+
+    .checks h3 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+    }
+
+    .check {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid #eef2ef;
+      font-size: 0.92rem;
+    }
+
+    .check:last-child { border-bottom: 0; }
+
+    .check input {
+      margin-top: 3px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .check strong { color: var(--ink); }
+    .check .expect {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-top: 2px;
+    }
+
+    .stages {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 18px 0 8px;
+    }
+
+    .stage {
+      background: var(--accent-soft);
+      border: 1px solid #c9d7ea;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .stage b {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .stage small {
+      color: var(--muted);
+      display: block;
+      line-height: 1.4;
+    }
+
+    footer {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .progress {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(246, 247, 244, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .progress strong { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="progress">
+    Checklist progress: <strong id="progressText">0 / 0 checked</strong>
+  </div>
+
+  <div class="wrap">
+    <header class="hero">
+      <h1>Data Lifecycle testing guide</h1>
+      <p>
+        Simple view of <strong>what you should do</strong> and
+        <strong>what you must not do</strong> when checking Active → Inactive → Archived → Erased.
+        Tick each check as you go.
+      </p>
+      <div class="meta">
+        <span class="chip">Branch: feature/user-lifecycle-inactive-archive</span>
+        <span class="chip">Updated: 2026-09-30</span>
+        <span class="chip">Source: docs/DATA_LIFECYCLE_MANUAL_TESTING.md</span>
+      </div>
+    </header>
+
+    <div class="banner-warn">
+      ⚠️ Never update the legacy database. Test only on the local/app database.
+    </div>
+
+    <div class="stages">
+      <div class="stage">
+        <b>Active</b>
+        <small>Live and visible. Org + IW can manage in normal lists.</small>
+      </div>
+      <div class="stage">
+        <b>Inactive</b>
+        <small>Hidden from active work. Org can restore users. Products stay in DB (not soft-deleted).</small>
+      </div>
+      <div class="stage">
+        <b>Archived</b>
+        <small>Removed from org restore in most cases. IW can restore. Soft-deleted / restricted.</small>
+      </div>
+      <div class="stage">
+        <b>Erased</b>
+        <small>GDPR anonymise for users only. Irreversible. IW only.</small>
+      </div>
+    </div>
+
+    <nav class="toc" aria-label="Phases">
+      <a href="#users">1. Users<span>Tenant + Admin</span></a>
+      <a href="#products">2. Products<span>Admin catalogue</span></a>
+      <a href="#orgs">3. Organisations<span>Archive + login</span></a>
+      <a href="#certs">4. Certificates<span>Org vs learner</span></a>
+      <a href="#events">5. Events / Trainers<span>Rules</span></a>
+      <a href="#hold">6. Hold delete<span>5 second confirm</span></a>
+      <a href="#erase">7. Erase<span>GDPR</span></a>
+    </nav>
+
+    <!-- USERS -->
+    <section class="phase" id="users">
+      <h2>1. Users</h2>
+      <p class="url">Tenant users list · /admin/users/list</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Use org <strong>Archive</strong> or <strong>Delete/Detach</strong> to make a user Inactive <em>for that org only</em>.</li>
+            <li>Check the same user can still use <strong>another organisation</strong>.</li>
+            <li>Org <strong>Unarchive</strong> to bring them back to that org.</li>
+            <li>IW Admin: use <strong>Archive Selected</strong> for platform-wide archive.</li>
+            <li>IW Admin: use <strong>Erase Selected (GDPR)</strong> only when you mean permanent anonymise.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t expect org Archive to soft-delete the global user (that was the old bug).</li>
+            <li>Don’t expect org Archive in Org A to break login for Org B.</li>
+            <li>Don’t expect IW Unarchive to auto re-join every organisation.</li>
+            <li>Don’t erase Platform Owner / current admin casually.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>U1</strong> Active tab shows active members only<span class="expect">Tenant users list → Active</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U2</strong> Archive/Delete moves user to Archived for this org only<span class="expect">Other orgs unchanged</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U3</strong> Unarchive returns user to Active for this org<span class="expect">Tenant Archived tab</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U4</strong> Cross-tenant still works after Org A archive<span class="expect">Login / Org B still OK</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A1</strong> Admin Archive Selected soft-deletes globally<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A2</strong> Admin Unarchive restores user without auto org re-join<span class="expect">Archived tab</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A3</strong> Erase Selected anonymises after 5s hold<span class="expect">Name/email become anonymized</span></span></label>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="phase" id="products">
+      <h2>2. Products</h2>
+      <p class="url">/admin/products/list</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Use tabs: <strong>Active</strong> / <strong>Inactive</strong> / <strong>Archived</strong>.</li>
+            <li>Use <strong>Set Inactive / Set Active</strong> to change availability without soft-delete.</li>
+            <li>Use <strong>Archive</strong> only when product should leave the catalogue (soft-delete).</li>
+            <li>Unarchive and choose Active or Inactive.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t treat Inactive the same as Archived.</li>
+            <li>Don’t hard-delete products (no Erased for products).</li>
+            <li>Don’t assign Inactive or Archived products to new orders.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>P1</strong> Three tabs show the right products<span class="expect">Active vs Inactive vs Archived</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>P2</strong> Set Inactive keeps product not soft-deleted<span class="expect">Appears on Inactive tab</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>P3</strong> Archive soft-deletes; Unarchive restores as Active/Inactive<span class="expect">Archived tab</span></span></label>
+      </div>
+    </section>
+
+    <!-- ORGS -->
+    <section class="phase" id="orgs">
+      <h2>3. Organisations</h2>
+      <p class="url">/admin/organisations/list</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Archive duplicate / wrong orgs from admin list.</li>
+            <li>Unarchive from Archived tab when needed.</li>
+            <li>Confirm login to an archived org is blocked.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t hard-delete organisations.</li>
+            <li>Don’t expect users to open an archived org portal.</li>
+            <li>Don’t touch legacy DB while testing.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>O1</strong> Archive Selected moves org to Archived<span class="expect">/admin/organisations/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>O2</strong> Unarchive restores org to Active<span class="expect">Archived tab</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>O3</strong> Login with archived org unique_id fails<span class="expect">Unauthorized / not available</span></span></label>
+      </div>
+    </section>
+
+    <!-- CERTS -->
+    <section class="phase" id="certs">
+      <h2>4. Certificates</h2>
+      <p class="url">/courses/certificates · /courses/my-certificates</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Org can <strong>Archive</strong> certificates from active workspace.</li>
+            <li>Learner should still see their own certificates (including archived).</li>
+            <li>IW restores via admin IOSH tools if needed.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t expect org UI to offer <strong>Unarchive</strong> on certificates.</li>
+            <li>Don’t hide archived certs from the learner “my certificates” view.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>C1</strong> Org archive removes cert from Active ops<span class="expect">/courses/certificates</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C2</strong> No Unarchive action for org on Archived tab<span class="expect">Restore not offered</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C3</strong> Learner still sees own certificates<span class="expect">/courses/my-certificates</span></span></label>
+      </div>
+    </section>
+
+    <!-- EVENTS -->
+    <section class="phase" id="events">
+      <h2>5. Events / Trainers</h2>
+      <p class="url">/admin/events · /admin/trainers</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Archive events only when status is <strong>completed</strong> or <strong>cancelled</strong>.</li>
+            <li>Archive trainer = remove trainer role assignment (user can remain).</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t archive draft/live/in-progress events (should fail).</li>
+            <li>Don’t confuse trainer archive with full user erase.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>E1</strong> Completed/cancelled event archives OK<span class="expect">Appears in Archived</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>E2</strong> Draft/live archive is blocked<span class="expect">Error / 422</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T1</strong> Trainer archive soft-deletes role only<span class="expect">User record remains</span></span></label>
+      </div>
+    </section>
+
+    <!-- HOLD -->
+    <section class="phase" id="hold">
+      <h2>6. Hold-to-confirm delete (5 seconds)</h2>
+      <p class="url">Any DeleteResourceForm modal · Admin Erase users</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Press and <strong>hold ~5 seconds</strong> to confirm destructive actions.</li>
+            <li>Release early to cancel safely.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t expect a single quick click to delete anymore.</li>
+            <li>Don’t assume Erase is the same as Archive (Erase anonymises).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>H1</strong> Release early → nothing deleted<span class="expect">Progress resets</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>H2</strong> Hold 5s → delete/detach runs<span class="expect">DeleteResourceForm</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>H3</strong> Admin Erase hold works<span class="expect">/admin/users/list</span></span></label>
+      </div>
+    </section>
+
+    <!-- ERASE -->
+    <section class="phase" id="erase">
+      <h2>7. Erase (GDPR — users only)</h2>
+      <p class="url">/admin/users/list → Erase Selected (GDPR)</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Use only for valid erasure / right-to-be-forgotten cases.</li>
+            <li>Expect name/email anonymised and user soft-deleted.</li>
+            <li>Historical records can keep the user id without PII.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t erase products or organisations this way (not supported).</li>
+            <li>Don’t expect erase to be reversible.</li>
+            <li>Don’t use erase when Inactive/Archive is enough.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>X1</strong> Erased user shows anonymized name/email<span class="expect">erased-…@anonymized.invalid</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>X2</strong> Erased user cannot log in with old email<span class="expect">Login fails</span></span></label>
+      </div>
+    </section>
+
+    <footer>
+      Open this file in a browser from
+      <code>docs/DATA_LIFECYCLE_MANUAL_TESTING.html</code>.
+      Checklist state is saved in this browser only.
+    </footer>
+  </div>
+
+  <script>
+    const KEY = 'lifecycle-manual-test-checks-v1';
+    const boxes = [...document.querySelectorAll('.check input[type="checkbox"]')];
+    const progressText = document.getElementById('progressText');
+
+    function load() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+        boxes.forEach((box, index) => {
+          box.checked = Boolean(saved[index]);
+        });
+      } catch (_) {}
+      updateProgress();
+    }
+
+    function save() {
+      const data = {};
+      boxes.forEach((box, index) => {
+        data[index] = box.checked;
+      });
+      localStorage.setItem(KEY, JSON.stringify(data));
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const total = boxes.length;
+      const done = boxes.filter((b) => b.checked).length;
+      progressText.textContent = `${done} / ${total} checked`;
+    }
+
+    boxes.forEach((box) => box.addEventListener('change', save));
+    load();
+  </script>
+</body>
+</html>
