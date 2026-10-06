@@ -92,6 +92,32 @@
       font-weight: 600;
     }
 
+    .changes {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 18px 8px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .changes h2 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+
+    .changes p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .changes ol {
+      margin: 0 0 8px;
+      padding-left: 1.2rem;
+    }
+
+    .changes li { margin: 0 0 8px; }
+
     nav.toc {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -283,12 +309,12 @@
       <h1>Data Lifecycle testing guide</h1>
       <p>
         Simple view of <strong>what you should do</strong> and
-        <strong>what you must not do</strong> when checking Active → Inactive → Archived → Erased.
-        Tick each check as you go.
+        <strong>what you must not do</strong> when checking Active → Inactive → Archived → Deleted.
+        Tick each check as you go. Start with the changes list.
       </p>
       <div class="meta">
         <span class="chip">Branch: feature/user-lifecycle-inactive-archive</span>
-        <span class="chip">Updated: 2026-09-30</span>
+        <span class="chip">Updated: 2026-10-06</span>
         <span class="chip">Source: docs/DATA_LIFECYCLE_MANUAL_TESTING.md</span>
       </div>
     </header>
@@ -304,15 +330,15 @@
       </div>
       <div class="stage">
         <b>Inactive</b>
-        <small>Hidden from active work. Org can restore users. Products stay in DB (not soft-deleted).</small>
+        <small>Still in the organisation. The organisation can set them active again.</small>
       </div>
       <div class="stage">
         <b>Archived</b>
-        <small>Removed from org restore in most cases. IW can restore. Soft-deleted / restricted.</small>
+        <small>Hidden from the organisation. Only IW can restore. One organisation at a time.</small>
       </div>
       <div class="stage">
-        <b>Erased</b>
-        <small>GDPR anonymise for users only. Irreversible. IW only.</small>
+        <b>Deleted</b>
+        <small>Anonymised record. The word on screen is Delete. Not reversible.</small>
       </div>
     </div>
 
@@ -323,8 +349,23 @@
       <a href="#certs">4. Certificates<span>Org vs learner</span></a>
       <a href="#events">5. Events / Trainers<span>Rules</span></a>
       <a href="#hold">6. Hold delete<span>5 second confirm</span></a>
-      <a href="#erase">7. Erase<span>GDPR</span></a>
+      <a href="#erase">7. Delete<span>Anonymise</span></a>
     </nav>
+
+    <section class="changes" id="changes">
+      <h2>Changes to test (6 Oct 2026)</h2>
+      <p>These are the behaviours that changed. Tick them before the older phase checks.</p>
+      <div class="checks">
+        <label class="check"><input type="checkbox" /><span><strong>T75</strong> On Manage users, the Inactive count matches the rows. People archived the old way (account soft-deleted, not anonymised) appear here. Set active brings them back.<span class="expect">/users/manage-users</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U-org</strong> Organisation sees Active and Inactive only. Set inactive is reversible. Archive shows a warning, then the person leaves this organisation. The organisation cannot undo Archive.<span class="expect">Other organisations unchanged</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U-iw</strong> IW sees Active, Inactive, Archived, and Deleted. Archive is for one organisation and records who archived. Unarchive asks Active or Inactive, and whether to include registrations and certificates.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Del</strong> Delete is on the row menu only. Form asks for first name, last name, reason (200 characters), a confirmation tick, and a hold. The Deleted tab shows the anonymised record. Deleting in one organisation does not anonymise the person in another organisation.<span class="expect">Word on screen is Delete</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Prod</strong> Products: select several and Set as inactive. On the Inactive tab, Set as active. Archive is still a separate soft-delete.<span class="expect">/admin/products/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Org</strong> After archive or unarchive, the organisation list refreshes and the row is on the correct tab.<span class="expect">/admin/organisations/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Link</strong> Linking accounts keeps both accounts. It does not merge them. The organisation still shows the organisation email, never the personal email. A switched-off organisation email cannot sign in.<span class="expect">Message points to a personal or other organisation email</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Cert</strong> Certificates follow users. Organisation: Active and Inactive, Set inactive is reversible, Archive warns and hides the certificate. IW also has Archived and can unarchive to active or inactive. The tab count matches the rows. There is no Deleted tab for certificates yet.<span class="expect">/courses/certificates</span></span></label>
+      </div>
+    </section>
 
     <!-- USERS -->
     <section class="phase" id="users">
@@ -334,32 +375,32 @@
         <div class="panel do">
           <h3>✅ Do</h3>
           <ul>
-            <li>Use org <strong>Archive</strong> or <strong>Delete/Detach</strong> to make a user Inactive <em>for that org only</em>.</li>
-            <li>Check the same user can still use <strong>another organisation</strong>.</li>
-            <li>Org <strong>Unarchive</strong> to bring them back to that org.</li>
-            <li>IW Admin: use <strong>Archive Selected</strong> for platform-wide archive.</li>
-            <li>IW Admin: use <strong>Erase Selected (GDPR)</strong> only when you mean permanent anonymise.</li>
+            <li>Organisation: <strong>Set inactive</strong> to pause someone. <strong>Set active</strong> brings them back.</li>
+            <li>Organisation: <strong>Archive</strong> hides them from this organisation only. Only IW can restore that.</li>
+            <li>Confirm the Inactive tab count equals the number of rows, including older archived accounts that were soft-deleted.</li>
+            <li>IW: archive one organisation, then unarchive and choose Active or Inactive, plus registrations and certificates.</li>
+            <li>Use <strong>Delete</strong> on the row only when the record should be anonymised.</li>
           </ul>
         </div>
         <div class="panel dont">
           <h3>❌ Don’t</h3>
           <ul>
-            <li>Don’t expect org Archive to soft-delete the global user (that was the old bug).</li>
-            <li>Don’t expect org Archive in Org A to break login for Org B.</li>
-            <li>Don’t expect IW Unarchive to auto re-join every organisation.</li>
-            <li>Don’t erase Platform Owner / current admin casually.</li>
+            <li>Don’t expect the organisation to see an Archived or Deleted tab.</li>
+            <li>Don’t expect Archive in one organisation to change another organisation or the personal login.</li>
+            <li>Don’t expect the organisation to undo an archive.</li>
+            <li>Don’t delete a Platform Owner or your own account casually.</li>
           </ul>
         </div>
       </div>
       <div class="checks">
         <h3>Tick when done</h3>
         <label class="check"><input type="checkbox" /><span><strong>U1</strong> Active tab shows active members only<span class="expect">Tenant users list → Active</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>U2</strong> Archive/Delete moves user to Archived for this org only<span class="expect">Other orgs unchanged</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>U3</strong> Unarchive returns user to Active for this org<span class="expect">Tenant Archived tab</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>U4</strong> Cross-tenant still works after Org A archive<span class="expect">Login / Org B still OK</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>A1</strong> Admin Archive Selected soft-deletes globally<span class="expect">/admin/users/list</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>A2</strong> Admin Unarchive restores user without auto org re-join<span class="expect">Archived tab</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>A3</strong> Erase Selected anonymises after 5s hold<span class="expect">Name/email become anonymized</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U2</strong> Set inactive keeps the person on the Inactive tab for this organisation only<span class="expect">Count matches rows</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U3</strong> Set active returns an inactive person to Active<span class="expect">Including older soft-deleted accounts</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U4</strong> Archive hides them from this organisation. Another organisation is unchanged<span class="expect">Org cannot unarchive</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A1</strong> IW Archive affects one organisation and stores who archived<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A2</strong> IW Unarchive can return them to Active or Inactive<span class="expect">Optional registrations and certificates</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A3</strong> Delete anonymises after the form and hold<span class="expect">Deleted tab shows the shell</span></span></label>
       </div>
     </section>
 
@@ -432,24 +473,25 @@
         <div class="panel do">
           <h3>✅ Do</h3>
           <ul>
-            <li>Org can <strong>Archive</strong> certificates from active workspace.</li>
-            <li>Learner should still see their own certificates (including archived).</li>
-            <li>IW restores via admin IOSH tools if needed.</li>
+            <li>Organisation tabs: <strong>Active</strong> and <strong>Inactive</strong>.</li>
+            <li><strong>Set inactive</strong> is reversible with <strong>Set active</strong>.</li>
+            <li><strong>Archive</strong> warns, then hides the certificate. Only IW sees Archived and can unarchive to active or inactive.</li>
+            <li>Confirm the tab count matches the rows.</li>
           </ul>
         </div>
         <div class="panel dont">
           <h3>❌ Don’t</h3>
           <ul>
-            <li>Don’t expect org UI to offer <strong>Unarchive</strong> on certificates.</li>
-            <li>Don’t hide archived certs from the learner “my certificates” view.</li>
+            <li>Don’t expect the organisation to see an Archived tab or to undo an archive.</li>
+            <li>Don’t expect a Deleted tab for certificates. That waits for the 6-year job.</li>
           </ul>
         </div>
       </div>
       <div class="checks">
         <h3>Tick when done</h3>
-        <label class="check"><input type="checkbox" /><span><strong>C1</strong> Org archive removes cert from Active ops<span class="expect">/courses/certificates</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>C2</strong> No Unarchive action for org on Archived tab<span class="expect">Restore not offered</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>C3</strong> Learner still sees own certificates<span class="expect">/courses/my-certificates</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C1</strong> Set inactive moves the certificate to Inactive, and Set active brings it back<span class="expect">Count matches rows</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C2</strong> Archive hides it from the organisation. IW Archived tab can restore it<span class="expect">/courses/certificates</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C3</strong> Learner still sees their own certificates<span class="expect">/courses/my-certificates</span></span></label>
       </div>
     </section>
 
@@ -484,7 +526,7 @@
     <!-- HOLD -->
     <section class="phase" id="hold">
       <h2>6. Hold-to-confirm delete (5 seconds)</h2>
-      <p class="url">Any DeleteResourceForm modal · Admin Erase users</p>
+      <p class="url">Any DeleteResourceForm modal · Delete user</p>
       <div class="grid-2">
         <div class="panel do">
           <h3>✅ Do</h3>
@@ -497,7 +539,7 @@
           <h3>❌ Don’t</h3>
           <ul>
             <li>Don’t expect a single quick click to delete anymore.</li>
-            <li>Don’t assume Erase is the same as Archive (Erase anonymises).</li>
+            <li>Don’t assume Delete is the same as Archive. Delete anonymises.</li>
           </ul>
         </div>
       </div>
@@ -505,36 +547,36 @@
         <h3>Tick when done</h3>
         <label class="check"><input type="checkbox" /><span><strong>H1</strong> Release early → nothing deleted<span class="expect">Progress resets</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>H2</strong> Hold 5s → delete/detach runs<span class="expect">DeleteResourceForm</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>H3</strong> Admin Erase hold works<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>H3</strong> Delete user hold works after the form is complete<span class="expect">/admin/users/list and organisation users</span></span></label>
       </div>
     </section>
 
     <!-- ERASE -->
     <section class="phase" id="erase">
-      <h2>7. Erase (GDPR — users only)</h2>
-      <p class="url">/admin/users/list → Erase Selected (GDPR)</p>
+      <h2>7. Delete (anonymise — users only)</h2>
+      <p class="url">Row menu → Delete, on organisation users and /admin/users/list</p>
       <div class="grid-2">
         <div class="panel do">
           <h3>✅ Do</h3>
           <ul>
-            <li>Use only for valid erasure / right-to-be-forgotten cases.</li>
-            <li>Expect name/email anonymised and user soft-deleted.</li>
-            <li>Historical records can keep the user id without PII.</li>
+            <li>Use Delete only when the person should be anonymised.</li>
+            <li>Fill in first name, last name, a reason of at most 200 characters, and the confirmation tick, then hold to confirm.</li>
+            <li>Expect the Deleted tab to show the anonymised shell. IW can still see that shell.</li>
           </ul>
         </div>
         <div class="panel dont">
           <h3>❌ Don’t</h3>
           <ul>
-            <li>Don’t erase products or organisations this way (not supported).</li>
-            <li>Don’t expect erase to be reversible.</li>
-            <li>Don’t use erase when Inactive/Archive is enough.</li>
+            <li>Don’t delete products or organisations this way.</li>
+            <li>Don’t expect Delete to be reversible.</li>
+            <li>Don’t use Delete when Inactive or Archive is enough.</li>
           </ul>
         </div>
       </div>
       <div class="checks">
         <h3>Tick when done</h3>
-        <label class="check"><input type="checkbox" /><span><strong>X1</strong> Erased user shows anonymized name/email<span class="expect">erased-…@anonymized.invalid</span></span></label>
-        <label class="check"><input type="checkbox" /><span><strong>X2</strong> Erased user cannot log in with old email<span class="expect">Login fails</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>X1</strong> Deleted user shows an anonymised name and email on the Deleted tab<span class="expect">erased-…@anonymized.invalid</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>X2</strong> Deleted user cannot log in with the old email<span class="expect">Login fails</span></span></label>
       </div>
     </section>
 
@@ -546,7 +588,7 @@
   </div>
 
   <script>
-    const KEY = 'lifecycle-manual-test-checks-v1';
+    const KEY = 'lifecycle-manual-test-checks-v2';
     const boxes = [...document.querySelectorAll('.check input[type="checkbox"]')];
     const progressText = document.getElementById('progressText');
 
