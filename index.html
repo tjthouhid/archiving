@@ -412,6 +412,45 @@
 
       <article class="ticket ready">
         <span class="status">Ready</span>
+        <h4>TEST-74 — Link organisation email to personal email to create learner record</h4>
+        <p>Linking is not a merge. Org A’s account <code>l@orga.com</code> and Org B’s account <code>l@orgb.com</code> stay separate. The learner adds <code>l@primary.com</code> on one of them. When the other address already belongs to an account, linking asks for one new password. That password is the one used next time, from either email. Org A still sees only <code>l@orga.com</code>. Org B still sees only <code>l@orgb.com</code>.</p>
+        <ol>
+          <li>Create the learner in Org A with <code>l@orga.com</code>, and in Org B with <code>l@orgb.com</code>.</li>
+          <li>Sign in as the Org A account. On <code>/settings/security</code>, add <code>l@orgb.com</code> and open the verification link.</li>
+          <li>Set a password and confirm it, then choose <strong>Link accounts</strong>. Sign out. Sign in with <code>l@orga.com</code> or <code>l@orgb.com</code> and that new password.</li>
+          <li>As Org A, open the learner. The email is <code>l@orga.com</code>. As Org B, the email is <code>l@orgb.com</code>. Each organisation list shows <strong>Linked account</strong> under the email, and does not show the other organisation’s email.</li>
+          <li>On <code>/admin/users/list</code> both people are still separate rows. Under <code>l@orga.com</code> the row says <strong>Linked to l@orgb.com</strong>. Under <code>l@orgb.com</code> it says <strong>Linked to l@orga.com</strong>.</li>
+          <li>Org A archives the learner. Org B can still open them and their Org B courses. On <code>/settings/account</code> the learner still sees Org A as a past employer.</li>
+          <li>IW unarchives them back to Org A with the same email, choosing Active. The profile shows a past archived period and a new <strong>Rehired</strong> period. New courses belong to the new period. The old courses stay on the past period.</li>
+          <li>On <code>/settings/privacy</code>, leave Workplace DNA scores unshared. Org B does not receive a score that also includes Org A. Share Org A’s score with Org B. Org B can then see that shared score. Org A still sees its own score without that share.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-83 — Archiving user: update warning message in Organisation portal</h4>
+        <p>The organisation archive warning now uses David’s longer text. One user includes their name. Several users say “these users”. The text explains that only IW can restore an archive, that Set inactive is the reversible choice, and that reports can count archived learners without showing their names.</p>
+        <ol>
+          <li>Open <code>/users/manage-users</code> as an organisation owner.</li>
+          <li>On one row, choose <strong>Archive</strong>. The first sentence is “Are you sure you want to archive this user, {their name}?” and includes “but you won’t be able to see the names of archived users in the data.”</li>
+          <li>Tick two people and choose <strong>Archive selected</strong>. The warning says “these users” and uses the same paragraphs.</li>
+          <li>Cancel. The people stay on the list.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>Set password — IW admin only</h4>
+        <p>On the IW user list, Set password is on the row menu only when the admin has Set user password. That permission is on the IW Owner role. Another admin role does not see it. The two linked accounts stay two users, so the password changes only the row you open.</p>
+        <ol>
+          <li>Open <code>/admin/users/list</code> as an IW Owner. On a row, choose <strong>Set password</strong>, enter it twice, and choose <strong>Update password</strong>.</li>
+          <li>Sign in as that person with the new password.</li>
+          <li>Sign in as an admin who is not an IW Owner. Set password is not on the row menu.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
         <h4>TEST-72 — Archiving Product: set inactive not added to list of bulk actions (Test P2)</h4>
         <p>A product can be set inactive from the row menu. The same action was missing when several products were ticked.</p>
         <ol>
@@ -542,6 +581,7 @@
       </article>
 
       <h3>Not in this build</h3>
+      <p>These are not done. CEA-137 is In Progress because it is the parent ticket. TEST-81, TEST-84, TEST-85, TEST-88, TEST-89, and TEST-90 are still Open. Do not mark them passed.</p>
 
       <article class="ticket later">
         <span class="status">Later</span>
@@ -559,15 +599,6 @@
         <ol>
           <li>Do not test a certificate Deleted tab, or a change to stored certificate PDFs, in this build.</li>
           <li>Certificates that are already built stop at Active, Inactive, and Archived. IW can unarchive to active or inactive.</li>
-        </ol>
-      </article>
-
-      <article class="ticket later">
-        <span class="status">Later</span>
-        <h4>TEST-83 — Archiving user: update warning message in Organisation portal</h4>
-        <p>The archive warning should keep the person’s name for one user, and use a longer explanation: archiving leaves the organisation, IW must restore it, personal data is anonymised, reports can still count them without names, and Set inactive is the reversible choice.</p>
-        <ol>
-          <li>Do not expect that full paragraph yet. The current warning is shorter.</li>
         </ol>
       </article>
 
@@ -840,7 +871,7 @@
 
     <section class="changes" id="remaining">
       <h2>Remaining — not in this build</h2>
-      <p>Leave these. The name, the ask, and what not to test are under <a href="#tickets">All tickets</a>: CEA-137, TEST-81, TEST-83, TEST-84, TEST-85, TEST-88, TEST-89, and TEST-90.</p>
+      <p>Leave these. The name, the ask, and what not to test are under <a href="#tickets">All tickets</a>: CEA-137, TEST-81, TEST-84, TEST-85, TEST-88, TEST-89, and TEST-90.</p>
     </section>
 
     <footer>
