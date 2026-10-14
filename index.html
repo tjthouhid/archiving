@@ -252,6 +252,35 @@
       margin-top: 2px;
     }
 
+    .ticket {
+      background: #fbfcfb;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 12px 0;
+    }
+
+    .ticket h4 {
+      margin: 8px 0 6px;
+      font-size: 1rem;
+    }
+
+    .ticket .status {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .ticket.ready .status { background: var(--do-bg); color: var(--do); }
+    .ticket.done .status { background: var(--accent-soft); color: var(--accent); }
+    .ticket.later .status { background: var(--warn-bg); color: var(--warn); }
+
+    .ticket p { margin: 0 0 8px; }
+    .ticket ol { margin: 0; padding-left: 1.2rem; }
+    .ticket li { margin: 0 0 4px; font-size: 0.92rem; }
+
     .stages {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -314,7 +343,7 @@
       </p>
       <div class="meta">
         <span class="chip">Branch: feature/user-lifecycle-inactive-archive</span>
-        <span class="chip">Updated: 2026-10-12</span>
+        <span class="chip">Updated: 2026-10-14</span>
         <span class="chip">Source: docs/DATA_LIFECYCLE_MANUAL_TESTING.md</span>
       </div>
     </header>
@@ -353,8 +382,8 @@
     </nav>
 
     <section class="changes" id="changes">
-      <h2>Changes to test (6 Oct 2026)</h2>
-      <p>These are the behaviours that changed. Tick them before the older phase checks.</p>
+      <h2>Changes to test</h2>
+      <p>Tick these before the older phase checks. Every Jira ticket is listed under <a href="#tickets">All tickets</a> with its name, what it asked for, and how to test it.</p>
       <div class="checks">
         <label class="check"><input type="checkbox" /><span><strong>T75</strong> On Manage users, the Inactive count matches the rows. People archived the old way (account soft-deleted, not anonymised) appear here. Set active brings them back.<span class="expect">/users/manage-users</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>U-org</strong> Organisation sees Active and Inactive only. Set inactive is reversible. Archive shows a warning, then the person leaves this organisation. The organisation cannot undo Archive.<span class="expect">Other organisations unchanged</span></span></label>
@@ -366,7 +395,228 @@
         <label class="check"><input type="checkbox" /><span><strong>Cert</strong> Certificates follow users. Organisation: Active and Inactive, Set inactive is reversible, Archive warns and hides the certificate. IW also has Archived and can unarchive to active or inactive. The tab count matches the rows. There is no Deleted tab for certificates yet.<span class="expect">/courses/certificates</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>Learner</strong> A personal login with no organisation opens <code>/learner</code>. Courses, certificates, and an assigned licence stay available. Past organisations are listed on the account profile. A new organisation later does not replace that learner record.<span class="expect">/learner and /settings/account</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>Events</strong> A completed or cancelled event stays on the Active list until it is archived. Archive stops a new booking. The learner still sees an event they already booked. A new event only offers a trainer whose trainer role is still active.<span class="expect">/admin/events and /admin/trainers</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T77</strong> On the organisation Inactive tab, Archive is on the row menu and in bulk actions, next to Set active.<span class="expect">/users/manage-users</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T78</strong> On the IW Archived tab, the row menu includes Unarchive. It asks Active or Inactive, plus registrations and certificates.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T79</strong> On the IW Inactive tab, filtering by organisation returns only inactive people in that organisation. A single creation date is “on or after” that day; set both bounds to the same day for that day only.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T87</strong> On the IW Inactive tab, the number on the tab matches the number of rows. The tab no longer counts one person the table does not show.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T86</strong> Delete user uses the same width as Archive user. It does not stretch across the screen.<span class="expect">Row menu → Delete</span></span></label>
       </div>
+
+    </section>
+
+    <section class="changes" id="tickets">
+      <h2>All tickets</h2>
+      <p>Jira still shows the ready tickets as in progress. They are in this build. The later tickets are written here so the ask is clear. Do not fail this build for them.</p>
+
+      <h3>Ready in this build</h3>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-72 — Archiving Product: set inactive not added to list of bulk actions (Test P2)</h4>
+        <p>A product can be set inactive from the row menu. The same action was missing when several products were ticked.</p>
+        <ol>
+          <li>Open <code>/admin/products/list</code> on Active.</li>
+          <li>Tick two products. Open bulk actions and choose <strong>Set as inactive</strong>.</li>
+          <li>Open Inactive. Both products are there, and they are not on Archived.</li>
+          <li>On Inactive, tick them and choose <strong>Set as active</strong>. They return to Active.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-73 — Archive Organisations: list does not refresh when Organisation archived / unarchived</h4>
+        <p>Archive and unarchive succeeded, but the organisation list stayed on the old tab until the page was reloaded.</p>
+        <ol>
+          <li>Open <code>/admin/organisations/list</code>.</li>
+          <li>Archive one organisation. The list refreshes by itself. The organisation leaves Active and appears on Archived.</li>
+          <li>On Archived, unarchive it. The list refreshes again and the organisation is back on Active.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-75 — Archiving users not working correctly on Staging</h4>
+        <p>On Manage users the Inactive tab counted people, including older switched-off accounts, while the table showed no rows.</p>
+        <ol>
+          <li>Open <code>/users/manage-users</code> as an organisation owner.</li>
+          <li>Open <strong>Inactive</strong>. The number on the tab equals the number of rows, including older accounts that were switched off before this change.</li>
+          <li>Choose <strong>Set active</strong> on one row. That person moves to Active, and both counts change by one.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-77 — Archiving: can't archive users who've been set as inactive in Organisation portal</h4>
+        <p>An organisation could not archive someone who was already inactive. Archive belongs on the row menu and in bulk actions.</p>
+        <ol>
+          <li>Stay on <code>/users/manage-users</code>, Inactive tab.</li>
+          <li>Open one row menu. <strong>Archive</strong> is there, next to Set active.</li>
+          <li>Tick two inactive people. Bulk actions include <strong>Archive selected</strong>.</li>
+          <li>Confirm. They leave this organisation. Another organisation they belong to is unchanged. This organisation cannot bring them back.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-78 — Archiving: No option to unarchive users from 3-dots menu in IW admin portal</h4>
+        <p>IW could not unarchive a user from the row menu on the Archived tab.</p>
+        <ol>
+          <li>Open <code>/admin/users/list</code> as an IW admin and open <strong>Archived</strong>.</li>
+          <li>Open the row menu and choose <strong>Unarchive</strong>.</li>
+          <li>Choose Active or Inactive, and whether registrations and certificates come back.</li>
+          <li>Confirm. The person leaves Archived and appears on the tab you chose.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-79 — Filter doesn’t work on IW admin when viewing inactive learners</h4>
+        <p>Maria Doyle was inactive at OCS, but filtering the IW Inactive list by that organisation returned nobody. A creation date also returned people from other days.</p>
+        <ol>
+          <li>On <code>/admin/users/list</code>, open <strong>Inactive</strong>.</li>
+          <li>Filter Organisation to one organisation. Every row is an inactive person in that organisation.</li>
+          <li>Open Created At. <strong>On or after</strong> alone keeps that day and later. Set both bounds to the same day and the list keeps that day only.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-86 — User deletion pop up form too wide</h4>
+        <p>The Delete user form stretched across the screen. It should be the same width as Archive user.</p>
+        <ol>
+          <li>On <code>/users/manage-users</code> or <code>/admin/users/list</code>, open the row menu and choose <strong>Archive</strong>. Note the card width.</li>
+          <li>Close it and open <strong>Delete</strong> on a row. The card is the same width.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-87 — Inactive users tab shows different number from rows in Admin portal</h4>
+        <p>On the IW user list the Inactive tab said 15 while the table showed 14 rows.</p>
+        <ol>
+          <li>Open <code>/admin/users/list</code> as an IW admin and open <strong>Inactive</strong>.</li>
+          <li>The number on the tab equals the number of rows.</li>
+        </ol>
+      </article>
+
+      <h3>Already marked Done</h3>
+
+      <article class="ticket done">
+        <span class="status">Done</span>
+        <h4>CEA-39 — Archive 'retired' products</h4>
+        <p>Products needed an archive, so a retired product stays in history and reports instead of being deleted from the catalogue.</p>
+        <ol>
+          <li>On <code>/admin/products/list</code>, archive a product. It leaves Active and appears on Archived.</li>
+          <li>Learner history and past orders still name that product.</li>
+        </ol>
+      </article>
+
+      <article class="ticket done">
+        <span class="status">Done</span>
+        <h4>TEST-18 — Filtering doesn't work on archived data</h4>
+        <p>Filters on an Archived tab, starting with products, did not apply to the archived rows.</p>
+        <ol>
+          <li>Open <code>/admin/products/list</code>, Archived tab.</li>
+          <li>Filter by a value you can see on one archived row. Only matching archived products remain.</li>
+        </ol>
+      </article>
+
+      <article class="ticket done">
+        <span class="status">Done</span>
+        <h4>TEST-19 — Archiving UI issues</h4>
+        <p>Unarchiving the last archived products left a blank page, and an Archived tab still showed when its count was zero.</p>
+        <ol>
+          <li>Unarchive the last product on the Archived tab. The product list loads again with that product on Active.</li>
+          <li>On a list with nothing archived, the Archived tab is hidden.</li>
+        </ol>
+      </article>
+
+      <article class="ticket done">
+        <span class="status">Done</span>
+        <h4>TEST-38 — Filter doesn't work on archived registrations</h4>
+        <p>Filtering archived registrations by last name returned no rows.</p>
+        <ol>
+          <li>Open archived registrations.</li>
+          <li>Filter by a last name that is on an archived row. That registration stays in the list.</li>
+        </ol>
+      </article>
+
+      <h3>Not in this build</h3>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>CEA-137 — Manage archiving</h4>
+        <p>Parent ticket for one archiving approach across users, events, certificates, products, and organisations. The list work above is part of it. Report toggles are still waiting on a report specification. The Question Set file is comments, not that specification.</p>
+        <ol>
+          <li>Do not test report include or exclude toggles in this build.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-81 — IOSH certificate list UI and functions in the IW admin portal</h4>
+        <p>IW needs to archive and unarchive an IOSH certificate on its own, with the usual tabs. The PDF anonymisation question is recorded as no immediate action. A certificate Deleted tab waits for the 6-year job.</p>
+        <ol>
+          <li>Do not test a certificate Deleted tab, or a change to stored certificate PDFs, in this build.</li>
+          <li>Certificates that are already built stop at Active, Inactive, and Archived. IW can unarchive to active or inactive.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-83 — Archiving user: update warning message in Organisation portal</h4>
+        <p>The archive warning should keep the person’s name for one user, and use a longer explanation: archiving leaves the organisation, IW must restore it, personal data is anonymised, reports can still count them without names, and Set inactive is the reversible choice.</p>
+        <ol>
+          <li>Do not expect that full paragraph yet. The current warning is shorter.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-84 — Filtering all / active / inactive / archived / deleted user-related data in Reports and Performance</h4>
+        <p>Reports should let an organisation include or exclude inactive, archived, and deleted people, show the lifecycle on each row, and show anonymised names for archived and deleted people.</p>
+        <ol>
+          <li>Do not test this. Report pages are still placeholders.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-85 — Creat new field: deletion cause category (autofilled)</h4>
+        <p>A deletion should be labelled automatically as User request or Information and Records Management policy. David notes the 6-year rule is undefined: six years after what, and whether it covers personal records only or all organisation data.</p>
+        <ol>
+          <li>Do not test a deletion-cause field or the 6-year job in this build.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-88 — View deleted users in Admin portal allows me to see personal data of deleted user</h4>
+        <p>The Deleted tab should show an anonymised record, plus the reason from the deletion form. On staging, Samuel Highmore still showed a real name. New deletes in this build anonymise name, email, and phone.</p>
+        <ol>
+          <li>Delete a test user from the row menu and open the Deleted tab. The name and email are anonymised, and the reason is still visible.</li>
+          <li>A person deleted before this build may still show a real name until that record is anonymised. That check is not part of this build.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-89 — Multipe user deletion requests: bug and further considerations</h4>
+        <p>IW should be able to delete several users at once and still enter a reason. Organisation owners stay on one row at a time. Steve Mcqueen and Steven Wynn at OCS were deleted together and landed on Archived instead of Deleted.</p>
+        <ol>
+          <li>Do not test bulk delete. Delete remains on the row menu, one person at a time, with a reason.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-90 — Archving products: bugs and suggestions</h4>
+        <p>Three leftovers: the bulk-action button label should not imply a single action, HubSpot must be checked for active, inactive, and archived products, and the archive warning’s last paragraph should use David’s HubSpot wording at one text size.</p>
+        <ol>
+          <li>Do not test the button label, HubSpot sync, or the revised warning in this build.</li>
+          <li>Set as inactive in bulk is TEST-72, and that part is ready.</li>
+        </ol>
+      </article>
     </section>
 
     <!-- USERS -->
@@ -378,7 +628,8 @@
           <h3>✅ Do</h3>
           <ul>
             <li>Organisation: <strong>Set inactive</strong> to pause someone. <strong>Set active</strong> brings them back.</li>
-            <li>Organisation: <strong>Archive</strong> hides them from this organisation only. Only IW can restore that.</li>
+            <li>Organisation: <strong>Archive</strong> hides them from this organisation only, including people already set inactive. Only IW can restore that.</li>
+            <li>IW Archived tab: <strong>Unarchive</strong> is on the row menu as well as the bulk action.</li>
             <li>Confirm the Inactive tab count equals the number of rows, including older archived accounts that were soft-deleted.</li>
             <li>IW: archive one organisation, then unarchive and choose Active or Inactive, plus registrations and certificates.</li>
             <li>Use <strong>Delete</strong> on the row only when the record should be anonymised.</li>
@@ -415,7 +666,7 @@
           <h3>✅ Do</h3>
           <ul>
             <li>Use tabs: <strong>Active</strong> / <strong>Inactive</strong> / <strong>Archived</strong>.</li>
-            <li>Use <strong>Set Inactive / Set Active</strong> to change availability without soft-delete.</li>
+            <li>Select several products and use <strong>Set as inactive</strong>. On the Inactive tab, <strong>Set as active</strong> brings them back. That is not Archive.</li>
             <li>Use <strong>Archive</strong> only when product should leave the catalogue (soft-delete).</li>
             <li>Unarchive and choose Active or Inactive.</li>
           </ul>
@@ -445,8 +696,8 @@
         <div class="panel do">
           <h3>✅ Do</h3>
           <ul>
-            <li>Archive duplicate / wrong orgs from admin list.</li>
-            <li>Unarchive from Archived tab when needed.</li>
+            <li>Archive an organisation and confirm the list refreshes onto the Archived tab without a reload.</li>
+            <li>Unarchive it and confirm the list refreshes back to Active without a reload.</li>
             <li>Confirm login to an archived org is blocked.</li>
           </ul>
         </div>
@@ -567,7 +818,7 @@
           <ul>
             <li>Use Delete only when the person should be anonymised.</li>
             <li>Fill in first name, last name, a reason of at most 200 characters, and the confirmation tick, then hold to confirm.</li>
-            <li>Expect the Deleted tab to show the anonymised shell. IW can still see that shell.</li>
+            <li>Expect the Deleted tab only for an IW admin with <strong>View Deleted users</strong> (<code>admin:organisation:deleted_users:view</code>). Open the shell from the row menu. It cannot be recovered or edited.</li>
           </ul>
         </div>
         <div class="panel dont">
@@ -583,17 +834,13 @@
         <h3>Tick when done</h3>
         <label class="check"><input type="checkbox" /><span><strong>X1</strong> Deleted user shows an anonymised name and email on the Deleted tab<span class="expect">erased-…@anonymized.invalid</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>X2</strong> Deleted user cannot log in with the old email<span class="expect">Login fails</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>X3</strong> The Deleted tab shows only when the admin has View Deleted users. View opens the anonymised record. Edit is not offered, and saving a change is refused.<span class="expect">/admin/users/list</span></span></label>
       </div>
     </section>
 
     <section class="changes" id="remaining">
       <h2>Remaining — not in this build</h2>
-      <p>Do not tick these yet. They are agreed or still waiting, and they are not ready to test.</p>
-      <ol>
-        <li><strong>CEA-137 report toggles.</strong> Waiting on the report specification. The Question Set file is comments, not that specification.</li>
-        <li><strong>6-year anonymising job.</strong> Which records, which fields, and the schedule.</li>
-        <li><strong>Certificate Deleted tab.</strong> Follows the 6-year job. Certificates currently stop at Archived.</li>
-      </ol>
+      <p>Leave these. The name, the ask, and what not to test are under <a href="#tickets">All tickets</a>: CEA-137, TEST-81, TEST-83, TEST-84, TEST-85, TEST-88, TEST-89, and TEST-90.</p>
     </section>
 
     <footer>
@@ -604,7 +851,7 @@
   </div>
 
   <script>
-    const KEY = 'lifecycle-manual-test-checks-v4';
+    const KEY = 'lifecycle-manual-test-checks-v5';
     const boxes = [...document.querySelectorAll('.check input[type="checkbox"]')];
     const progressText = document.getElementById('progressText');
 
