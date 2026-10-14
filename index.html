@@ -342,7 +342,7 @@
         Tick each check as you go. Start with the changes list.
       </p>
       <div class="meta">
-        <span class="chip">Branch: feature/user-lifecycle-inactive-archive</span>
+        <span class="chip">Branch: fix/TEST-93-TEST-94-org-archive-and-deleted-users</span>
         <span class="chip">Updated: 2026-10-14</span>
         <span class="chip">Source: docs/DATA_LIFECYCLE_MANUAL_TESTING.md</span>
       </div>
@@ -400,6 +400,8 @@
         <label class="check"><input type="checkbox" /><span><strong>T79</strong> On the IW Inactive tab, filtering by organisation returns only inactive people in that organisation. A single creation date is “on or after” that day; set both bounds to the same day for that day only.<span class="expect">/admin/users/list</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>T87</strong> On the IW Inactive tab, the number on the tab matches the number of rows. The tab no longer counts one person the table does not show.<span class="expect">/admin/users/list</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>T86</strong> Delete user uses the same width as Archive user. It does not stretch across the screen.<span class="expect">Row menu → Delete</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T93</strong> On the IW Deleted tab, bulk Actions does not offer Delete. The row menu still has no Delete. A deleted person cannot be deleted again.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T94</strong> Edit Organisation shows Lifecycle status. The three-dot menu can Archive or Unarchive. The organisation view menu can do the same, next to Edit Organisation.<span class="expect">/admin/organisations/…/edit</span></span></label>
       </div>
 
     </section>
@@ -538,6 +540,31 @@
         </ol>
       </article>
 
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-93 — Remove option to delete an already deleted user from bulk Actions</h4>
+        <p>The Deleted tab still offered <strong>Delete Selected</strong> under Actions. That call fails, because the person is already deleted. The row menu already hid Delete. Actions on this tab no longer includes it.</p>
+        <ol>
+          <li>Open <code>/admin/users/list</code> as an IW admin who can view deleted users, and open <strong>Deleted</strong>.</li>
+          <li>Tick one or more rows. <strong>Actions</strong> does not include <strong>Delete Selected</strong>. With nothing else to do on this tab, Actions is not shown.</li>
+          <li>Open a row menu. Delete is still absent. View remains.</li>
+          <li>On Active or Inactive, Actions still includes the actions for that tab. Delete of a live user stays on the row menu.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-94 — Allow Organisation to be archived from Edit Organisation</h4>
+        <p>Archive was only on the organisation list. The edit page now shows Lifecycle status, and its three-dot menu can archive or unarchive. The organisation view menu can do the same, next to Edit Organisation.</p>
+        <ol>
+          <li>Open an active organisation at <code>/admin/organisations/…/edit</code>. The header says <strong>Lifecycle status</strong> <strong>Active</strong>.</li>
+          <li>Open the three-dot menu and choose <strong>Archive</strong>. The status changes to <strong>Archived</strong> without leaving the page. The menu now says <strong>Unarchive</strong>.</li>
+          <li>Open <code>/admin/organisations/list</code> on Archived. That organisation is there.</li>
+          <li>Open the organisation view page. The three-dot menu includes <strong>Unarchive</strong> next to Edit Organisation, and the details show Lifecycle status Archived.</li>
+          <li>Choose <strong>Unarchive</strong>. The status returns to Active, and the organisation is back on the Active list.</li>
+        </ol>
+      </article>
+
       <h3>Already marked Done</h3>
 
       <article class="ticket done">
@@ -664,6 +691,7 @@
             <li>Confirm the Inactive tab count equals the number of rows, including older archived accounts that were soft-deleted.</li>
             <li>IW: archive one organisation, then unarchive and choose Active or Inactive, plus registrations and certificates.</li>
             <li>Use <strong>Delete</strong> on the row only when the record should be anonymised.</li>
+            <li>On the IW Deleted tab, do not look for Delete in bulk Actions. It is removed. The row menu already hides it.</li>
           </ul>
         </div>
         <div class="panel dont">
@@ -673,6 +701,7 @@
             <li>Don’t expect Archive in one organisation to change another organisation or the personal login.</li>
             <li>Don’t expect the organisation to undo an archive.</li>
             <li>Don’t delete a Platform Owner or your own account casually.</li>
+            <li>Don’t expect to delete a user who is already on the Deleted tab.</li>
           </ul>
         </div>
       </div>
@@ -729,6 +758,7 @@
           <ul>
             <li>Archive an organisation and confirm the list refreshes onto the Archived tab without a reload.</li>
             <li>Unarchive it and confirm the list refreshes back to Active without a reload.</li>
+            <li>On Edit Organisation, read <strong>Lifecycle status</strong> and use the three-dot menu to Archive or Unarchive. The view page menu can do the same.</li>
             <li>Confirm login to an archived org is blocked.</li>
           </ul>
         </div>
@@ -746,6 +776,7 @@
         <label class="check"><input type="checkbox" /><span><strong>O1</strong> Archive Selected moves org to Archived<span class="expect">/admin/organisations/list</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>O2</strong> Unarchive restores org to Active<span class="expect">Archived tab</span></span></label>
         <label class="check"><input type="checkbox" /><span><strong>O3</strong> Login with archived org unique_id fails<span class="expect">Unauthorized / not available</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>O4</strong> Edit Organisation shows Lifecycle status and can Archive or Unarchive from the three-dot menu<span class="expect">View menu can do the same</span></span></label>
       </div>
     </section>
 
@@ -882,7 +913,7 @@
   </div>
 
   <script>
-    const KEY = 'lifecycle-manual-test-checks-v5';
+    const KEY = 'lifecycle-manual-test-checks-v6';
     const boxes = [...document.querySelectorAll('.check input[type="checkbox"]')];
     const progressText = document.getElementById('progressText');
 
