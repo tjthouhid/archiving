@@ -607,8 +607,31 @@
         </ol>
       </article>
 
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-91 — User account creation / verification problem</h4>
+        <p>Tracy Wilson and Rob Watson already had OCS accounts. JCB accounts were created for tracy.wilson@jcb.com and rob.watson@jcb.com. The first verification email did not arrive. The follow-up link opened the new-organisation form with Company Name JCB, Industry Construction, and Total Employees 1–50 already filled in, and Next did nothing. An invited person is no longer asked to create an organisation. Signing in before the email is confirmed sends the confirm-email message straight away. A self-signup still sees the company form, and Next submits the values on screen.</p>
+        <ol>
+          <li>Add a new person to an existing organisation. Sign in with the password from the reset or invite email before the address is confirmed.</li>
+          <li>Mailhog receives a confirm-email message on that sign-in, without using Resend. The message does not ask them to create an organisation.</li>
+          <li>Open the link. The company form does not appear. The person lands in the app they can use.</li>
+          <li>Start a brand-new organisation signup, open its verification link, fill company name, industry, and employees, and choose Next. The organisation is created.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-88 — View deleted users in Admin portal allows me to see personal data of deleted user</h4>
+        <p>The Deleted tab and the user view show an anonymised name and email, plus the reason from the deletion form. Attribute values and linked personal emails are not shown. A person deleted earlier who still had a real name on the Deleted tab is shown as anonymised, and the stored record is repaired.</p>
+        <ol>
+          <li>Delete a test user from the row menu and open the Deleted tab. The name and email are anonymised, and the deletion reason is on the row.</li>
+          <li>Open that user. The details show the anonymised name, the anonymised email, and the deletion reason. The original name, email, and attribute values are not shown.</li>
+          <li>Open a person who was deleted before this build. The Deleted tab no longer shows their real name or email.</li>
+        </ol>
+      </article>
+
       <h3>Not in this build</h3>
-      <p>These are not done. CEA-137 is In Progress because it is the parent ticket. TEST-81, TEST-84, TEST-85, TEST-88, TEST-89, and TEST-90 are still Open. Do not mark them passed.</p>
+      <p>These are not done. CEA-137 is In Progress because it is the parent ticket. TEST-81, TEST-84, TEST-85, TEST-89, and TEST-90 are still Open. Do not mark them passed.</p>
 
       <article class="ticket later">
         <span class="status">Later</span>
@@ -644,16 +667,6 @@
         <p>A deletion should be labelled automatically as User request or Information and Records Management policy. David notes the 6-year rule is undefined: six years after what, and whether it covers personal records only or all organisation data.</p>
         <ol>
           <li>Do not test a deletion-cause field or the 6-year job in this build.</li>
-        </ol>
-      </article>
-
-      <article class="ticket later">
-        <span class="status">Later</span>
-        <h4>TEST-88 — View deleted users in Admin portal allows me to see personal data of deleted user</h4>
-        <p>The Deleted tab should show an anonymised record, plus the reason from the deletion form. On staging, Samuel Highmore still showed a real name. New deletes in this build anonymise name, email, and phone.</p>
-        <ol>
-          <li>Delete a test user from the row menu and open the Deleted tab. The name and email are anonymised, and the reason is still visible.</li>
-          <li>A person deleted before this build may still show a real name until that record is anonymised. That check is not part of this build.</li>
         </ol>
       </article>
 
@@ -902,7 +915,7 @@
 
     <section class="changes" id="remaining">
       <h2>Remaining — not in this build</h2>
-      <p>Leave these. The name, the ask, and what not to test are under <a href="#tickets">All tickets</a>: CEA-137, TEST-81, TEST-84, TEST-85, TEST-88, TEST-89, and TEST-90.</p>
+      <p>Leave these. The name, the ask, and what not to test are under <a href="#tickets">All tickets</a>: CEA-137, TEST-81, TEST-84, TEST-85, TEST-89, and TEST-90.</p>
     </section>
 
     <footer>
