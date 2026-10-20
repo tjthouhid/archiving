@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEST-81 — IW admin IOSH certificate tabs</title>
+  <style>
+    :root {
+      --bg: #f6f7f4;
+      --card: #ffffff;
+      --ink: #1a1f1c;
+      --muted: #5c675f;
+      --line: #d9e0da;
+      --accent: #1d4e89;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(26, 31, 28, 0.06);
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, #eef5ff 0, transparent 28%),
+        radial-gradient(circle at top right, #edf8f1 0, transparent 24%),
+        var(--bg);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    header.hero {
+      background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%);
+      color: #fff;
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.02em; }
+    header.hero p { margin: 0; opacity: 0.92; }
+    a { color: var(--accent); }
+    header.hero a { color: #fff; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    label.check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+    label.check:first-of-type { border-top: 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TEST-81 — IW admin IOSH certificate tabs</h1>
+      <p>Archive or unarchive a certificate without changing the learner.</p>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-81">Jira TEST-81</a></p>
+    </header>
+
+    <section class="card">
+      <h2>What changed</h2>
+      <p><code>/admin/iosh/view-certificates</code> has Active, Inactive, Archived, and Deleted tabs, row checkboxes, and archive or unarchive actions. Those actions change the certificate only. The learner stays on the users list.</p>
+    </section>
+
+    <section class="card">
+      <h2>Checks</h2>
+      <label class="check"><input type="checkbox" data-id="tabs" /> Sign in as an IW admin and open <code>/admin/iosh/view-certificates</code>. The four tabs are visible, and each row has a checkbox.</label>
+      <label class="check"><input type="checkbox" data-id="archive" /> On the Active tab, archive one certificate from the row menu. The learner’s user record stays active.</label>
+      <label class="check"><input type="checkbox" data-id="moved" /> That certificate leaves the Active tab and appears on the Archived tab.</label>
+      <label class="check"><input type="checkbox" data-id="unarchive" /> Unarchive it from the Archived tab. It returns to the Active tab.</label>
+      <label class="check"><input type="checkbox" data-id="bulk" /> Select more than one active certificate and use Archive Selected. Those certificates move together, and their learners stay active.</label>
+      <label class="check"><input type="checkbox" data-id="delete" /> Delete a certificate. It appears on the Deleted tab, and the learner is still on the users list.</label>
+    </section>
+  </div>
+  <script>
+    const key = 'testing-test-81';
+    const boxes = document.querySelectorAll('input[type="checkbox"][data-id]');
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    boxes.forEach((box) => {
+      box.checked = Boolean(saved[box.dataset.id]);
+      box.addEventListener('change', () => {
+        const next = JSON.parse(localStorage.getItem(key) || '{}');
+        next[box.dataset.id] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+  </script>
+</body>
+</html>
