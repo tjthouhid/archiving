@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Account email — What is fixed / What is still open</title>
+  <style>
+    :root {
+      --bg: #f6f7f4;
+      --card: #ffffff;
+      --ink: #1a1f1c;
+      --muted: #5c675f;
+      --line: #d9e0da;
+      --do: #0f6b3c;
+      --do-bg: #e8f6ee;
+      --do-border: #9fd4b5;
+      --dont: #9b1c1c;
+      --dont-bg: #fdecec;
+      --dont-border: #f0b4b4;
+      --accent: #1d4e89;
+      --accent-soft: #e8eef7;
+      --warn: #8a5a00;
+      --warn-bg: #fff6e5;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(26, 31, 28, 0.06);
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, #eef5ff 0, transparent 28%),
+        radial-gradient(circle at top right, #edf8f1 0, transparent 24%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 18px 64px; }
+
+    header.hero {
+      background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%);
+      color: #fff;
+      border-radius: 22px;
+      padding: 28px 28px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    header.hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      letter-spacing: -0.02em;
+    }
+
+    header.hero p { margin: 0; opacity: 0.92; max-width: 48rem; }
+
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      font-size: 0.85rem;
+    }
+
+    .chip a { color: inherit; }
+
+    .banner-warn {
+      background: var(--warn-bg);
+      border: 1px solid #f0d59a;
+      color: var(--warn);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 22px;
+    }
+
+    .changes, section.phase {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      scroll-margin-top: 16px;
+    }
+
+    h2 { margin: 0 0 8px; font-size: 1.25rem; }
+    .muted { color: var(--muted); margin: 0 0 12px; }
+
+    nav.toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    nav.toc a {
+      text-decoration: none;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      box-shadow: var(--shadow);
+    }
+
+    nav.toc a span {
+      display: block;
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.78rem;
+      margin-top: 2px;
+    }
+
+    .url {
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.86rem;
+      word-break: break-all;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin-top: 8px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th { color: var(--muted); font-weight: 600; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .panel { border-radius: 14px; padding: 14px 14px 10px; border: 1px solid; }
+    .panel.do { background: var(--do-bg); border-color: var(--do-border); }
+    .panel.dont { background: var(--dont-bg); border-color: var(--dont-border); }
+    .panel.open { background: var(--warn-bg); border-color: #f0d59a; }
+    .panel h3 { margin: 0 0 8px; font-size: 0.95rem; }
+    .panel.do h3 { color: var(--do); }
+    .panel.dont h3 { color: var(--dont); }
+    .panel.open h3 { color: var(--warn); }
+    .panel ul { margin: 0; padding: 0 0 0 1.1rem; }
+    .panel li { margin: 0 0 8px; font-size: 0.92rem; }
+
+    .checks { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 14px; }
+    .checks h3 { margin: 0 0 10px; font-size: 0.95rem; }
+
+    .check {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid #eef2ef;
+      font-size: 0.92rem;
+    }
+
+    .check:last-child { border-bottom: 0; }
+    .check input { margin-top: 3px; width: 16px; height: 16px; }
+    .check .expect { display: block; color: var(--muted); font-size: 0.84rem; margin-top: 2px; }
+
+    .ticket {
+      background: #fbfcfb;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 12px 0;
+    }
+
+    .ticket h4 { margin: 8px 0 6px; font-size: 1rem; }
+    .ticket .status {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .ticket.ready .status { background: var(--do-bg); color: var(--do); }
+    .ticket.open .status { background: var(--warn-bg); color: var(--warn); }
+    .ticket p { margin: 0 0 8px; }
+    .ticket ol { margin: 0; padding-left: 1.2rem; }
+    .ticket li { margin: 0 0 4px; font-size: 0.92rem; }
+
+    footer { margin-top: 24px; color: var(--muted); font-size: 0.85rem; text-align: center; }
+    footer a { color: var(--accent); }
+
+    .progress {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(246, 247, 244, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .progress strong { color: var(--ink); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; }
+  </style>
+</head>
+<body>
+  <div class="progress">
+    Checklist progress: <strong id="progressText">0 / 0 checked</strong>
+  </div>
+
+  <div class="wrap">
+    <header class="hero">
+      <h1>Account email and personal login</h1>
+      <p>
+        What was fixed for linked organisation accounts and a personal primary email,
+        how to check it with Rob Watson, and the questions that are still open.
+        Tick each check as you go.
+      </p>
+      <div class="meta">
+        <span class="chip">Person: Rob Watson</span>
+        <span class="chip">Updated: 2026-10-20</span>
+        <span class="chip"><a href="index.html">All guides</a></span>
+        <span class="chip"><a href="DATA_LIFECYCLE_MANUAL_TESTING.html">Data lifecycle guide</a></span>
+      </div>
+    </header>
+
+    <div class="banner-warn">
+      Test on the local app only. Rob’s two organisation memberships are archived.
+      Sign-in for the personal account is <code>rob.watson@example.com</code>.
+      <code>rob.watson@jcb.com</code> and <code>rob.watson@ocs.com</code> cannot sign in while those organisations stay archived.
+    </div>
+
+    <nav class="toc" aria-label="Sections">
+      <a href="#who">1. Who is who<span>Three emails, two accounts</span></a>
+      <a href="#fixed">2. What is fixed<span>List, login, courses</span></a>
+      <a href="#check">3. Checks<span>IW, org, learner</span></a>
+      <a href="#open">4. Still open<span>Certificate and score</span></a>
+    </nav>
+
+    <section class="phase" id="who">
+      <h2>1. Who is who</h2>
+      <p class="muted">Linking did not merge the two organisation accounts. The primary email sits on the JCB account and is the personal login.</p>
+      <table>
+        <thead>
+          <tr><th>Email</th><th>Kind</th><th>Organisation</th><th>Now</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>rob.watson@jcb.com</code></td>
+            <td>Organisation</td>
+            <td>JCB Excavators LTD</td>
+            <td>Archived. Cannot sign in.</td>
+          </tr>
+          <tr>
+            <td><code>rob.watson@ocs.com</code></td>
+            <td>Organisation</td>
+            <td>OCS Group UK Ltd</td>
+            <td>Archived. Cannot sign in. Separate account, linked.</td>
+          </tr>
+          <tr>
+            <td><code>rob.watson@example.com</code></td>
+            <td>Primary, personal</td>
+            <td>None</td>
+            <td>Active. This is the learner login.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="phase" id="fixed">
+      <h2>2. What is fixed</h2>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>Fixed</h3>
+          <ul>
+            <li>IW admin was showing <code>rob.watson@example.com</code> on the JCB row. An organisation row now shows that organisation’s email.</li>
+            <li>The personal email is labelled <strong>Personal</strong> under the organisation row. It is not treated as the organisation email.</li>
+            <li>An organisation portal shows only its own email. It does not show the other organisation or the personal email. It may show the words “Linked account”.</li>
+            <li>A hand-added <code>X-Admin-Request</code> header no longer reveals linked or personal emails inside an organisation.</li>
+            <li>IW search finds a person by any of their emails. An organisation search does not find them by a personal email or another organisation’s email.</li>
+            <li>Editing the email inside an organisation changes that organisation’s email only. It does not replace the personal primary.</li>
+            <li>An email that already belongs to someone else is refused.</li>
+            <li>After both organisations are archived, the personal account stays on the IW <strong>Active</strong> list. Organisation is “Personal account”. There is no “Linked to …” line, because the linked organisations are archived.</li>
+            <li>The archived organisation rows stay on the IW <strong>Archived</strong> tab, each with its own organisation email.</li>
+            <li>Signing in with the primary email does not ask for an organisation, and opens the learner profile.</li>
+            <li>Account settings still lists OCS and JCB as past employers.</li>
+            <li>The completed course stays on the learner profile: IOSH Safety for Executives and Directors. It is under <strong>Expired</strong>, because the registration ended on 24 June 2026.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>Not changed</h3>
+          <ul>
+            <li>The two organisation accounts were not merged into one user.</li>
+            <li>Archived organisation emails stay unable to sign in.</li>
+            <li>Delete still anonymises. This work does not make a deleted person recoverable.</li>
+            <li>No Workplace DNA score was created. None is stored for either of Rob’s accounts.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="phase" id="check">
+      <h2>3. Checks</h2>
+      <p class="url">/admin/users/list · organisation Manage users · /learner · /settings/account</p>
+      <div class="checks">
+        <h3>IW admin — /admin/users/list</h3>
+        <label class="check"><input type="checkbox" /><span><strong>A1</strong> Active search for Rob shows one row: <code>rob.watson@example.com</code>, organisation “Personal account”.<span class="expect">No “Linked to rob.watson@ocs.com” line</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A2</strong> Archived search shows two rows: <code>rob.watson@jcb.com</code> for JCB, and <code>rob.watson@ocs.com</code> for OCS.<span class="expect">Each row may say Personal: rob.watson@example.com</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A3</strong> Search <code>rob.watson@example.com</code>, <code>rob.watson@jcb.com</code>, and <code>rob.watson@ocs.com</code>. All three find him.<span class="expect">Active finds the personal row. Archived finds the organisation rows.</span></span></label>
+      </div>
+      <div class="checks">
+        <h3>While both organisations are active (use another learner, or unarchive Rob first)</h3>
+        <label class="check"><input type="checkbox" /><span><strong>B1</strong> IW Active shows the organisation email on each row, plus “Linked to” the other organisation email, plus “Personal:” the primary email.<span class="expect">The personal email is not the main email of an organisation row</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>B2</strong> JCB’s own user list shows only <code>rob.watson@jcb.com</code>. OCS shows only <code>rob.watson@ocs.com</code>.<span class="expect">“Linked account” may appear. The other email must not.</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>B3</strong> Inside JCB, change his email and save. JCB’s email changes. <code>rob.watson@example.com</code> is still the primary login.<span class="expect">Saving an email that already belongs to someone else is refused</span></span></label>
+      </div>
+      <div class="checks">
+        <h3>Learner login</h3>
+        <label class="check"><input type="checkbox" /><span><strong>C1</strong> Sign in with <code>rob.watson@example.com</code>. No organisation is offered. The app opens <code>/learner</code>.<span class="expect">Password is the one already on that account</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C2</strong> <code>rob.watson@jcb.com</code> and <code>rob.watson@ocs.com</code> cannot sign in.<span class="expect">Message says that email can no longer be used</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C3</strong> <code>/settings/account</code> lists OCS Group UK Ltd and JCB Excavators LTD as past employers.<span class="expect">Both say archived / past</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C4</strong> On My courses, switch the filter to <strong>Expired</strong>. IOSH Safety for Executives and Directors is there, completed.<span class="expect">It does not appear under Active courses. The registration ended 24 June 2026.</span></span></label>
+      </div>
+    </section>
+
+    <section class="phase" id="open">
+      <h2>4. Still open</h2>
+      <article class="ticket open">
+        <span class="status">Question</span>
+        <h4>Certificate — not fixed</h4>
+        <p>
+          Rob has a certificate record for the IOSH course, with pass marks, owned by the OCS account.
+          Archive hid that record. It was never attached to the learner certificate download list, so
+          <code>/courses/my-certificates</code> stays empty after he signs in with the primary email.
+        </p>
+        <p>Question for the next decision: should that hidden certificate appear on the learner’s own certificate page, while the organisation still does not see it?</p>
+      </article>
+      <article class="ticket open">
+        <span class="status">Question</span>
+        <h4>Workplace DNA score — nothing to restore</h4>
+        <p>
+          Neither account has a stored Workplace DNA score. The learner score gauge is empty because no score was calculated, not because this change deleted one.
+          A score stored on a linked organisation account would be read for the personal login. There is no such row for Rob.
+        </p>
+      </article>
+      <article class="ticket ready">
+        <span class="status">Fixed</span>
+        <h4>Earlier delete test</h4>
+        <p>
+          Rob’s OCS account had been anonymised by a delete test on 16 October 2026. That anonymised flag was cleared so the account is a normal record again.
+          The password on the OCS account itself was already gone. Sign-in uses the primary account, which still has a password.
+          Personal attribute values removed by that delete were not put back.
+        </p>
+      </article>
+    </section>
+
+    <footer>
+      Open this file in a browser from
+      <code>docs/testing/ACCOUNT_EMAIL_MANUAL_TESTING.html</code>.
+      Back to <a href="index.html">all testing guides</a>.
+      Checklist state is saved in this browser only.
+    </footer>
+  </div>
+
+  <script>
+    const KEY = 'account-email-manual-test-checks-v1';
+    const boxes = [...document.querySelectorAll('.check input[type="checkbox"]')];
+    const progressText = document.getElementById('progressText');
+
+    function load() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+        boxes.forEach((box, index) => {
+          box.checked = Boolean(saved[index]);
+        });
+      } catch (_) {}
+      updateProgress();
+    }
+
+    function save() {
+      const data = {};
+      boxes.forEach((box, index) => {
+        data[index] = box.checked;
+      });
+      localStorage.setItem(KEY, JSON.stringify(data));
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const total = boxes.length;
+      const done = boxes.filter((box) => box.checked).length;
+      progressText.textContent = `${done} / ${total} checked`;
+    }
+
+    boxes.forEach((box) => box.addEventListener('change', save));
+    load();
+  </script>
+</body>
+</html>

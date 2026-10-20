@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Lifecycle — What to do / What not to do</title>
+  <style>
+    :root {
+      --bg: #f6f7f4;
+      --card: #ffffff;
+      --ink: #1a1f1c;
+      --muted: #5c675f;
+      --line: #d9e0da;
+      --do: #0f6b3c;
+      --do-bg: #e8f6ee;
+      --do-border: #9fd4b5;
+      --dont: #9b1c1c;
+      --dont-bg: #fdecec;
+      --dont-border: #f0b4b4;
+      --accent: #1d4e89;
+      --accent-soft: #e8eef7;
+      --warn: #8a5a00;
+      --warn-bg: #fff6e5;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(26, 31, 28, 0.06);
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, #eef5ff 0, transparent 28%),
+        radial-gradient(circle at top right, #edf8f1 0, transparent 24%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
+
+    header.hero {
+      background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%);
+      color: #fff;
+      border-radius: 22px;
+      padding: 28px 28px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    header.hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      letter-spacing: -0.02em;
+    }
+
+    header.hero p {
+      margin: 0;
+      opacity: 0.92;
+      max-width: 48rem;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      font-size: 0.85rem;
+    }
+
+    .chip a { color: inherit; }
+
+    .banner-warn {
+      background: var(--warn-bg);
+      border: 1px solid #f0d59a;
+      color: var(--warn);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      font-weight: 600;
+    }
+
+    .changes {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 18px 8px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .changes h2 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+
+    .changes p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .changes ol {
+      margin: 0 0 8px;
+      padding-left: 1.2rem;
+    }
+
+    .changes li { margin: 0 0 8px; }
+
+    nav.toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    nav.toc a {
+      text-decoration: none;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      box-shadow: var(--shadow);
+    }
+
+    nav.toc a span {
+      display: block;
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.78rem;
+      margin-top: 2px;
+    }
+
+    section.phase {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      scroll-margin-top: 16px;
+    }
+
+    section.phase h2 {
+      margin: 0 0 6px;
+      font-size: 1.25rem;
+    }
+
+    section.phase .url {
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.86rem;
+      word-break: break-all;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      border-radius: 14px;
+      padding: 14px 14px 10px;
+      border: 1px solid;
+    }
+
+    .panel.do {
+      background: var(--do-bg);
+      border-color: var(--do-border);
+    }
+
+    .panel.dont {
+      background: var(--dont-bg);
+      border-color: var(--dont-border);
+    }
+
+    .panel h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel.do h3 { color: var(--do); }
+    .panel.dont h3 { color: var(--dont); }
+
+    .panel ul {
+      margin: 0;
+      padding: 0 0 0 1.1rem;
+    }
+
+    .panel li {
+      margin: 0 0 8px;
+      font-size: 0.92rem;
+    }
+
+    .checks {
+      margin-top: 16px;
+      border-top: 1px dashed var(--line);
+      padding-top: 14px;
+    }
+
+    .checks h3 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+    }
+
+    .check {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid #eef2ef;
+      font-size: 0.92rem;
+    }
+
+    .check:last-child { border-bottom: 0; }
+
+    .check input {
+      margin-top: 3px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .check strong { color: var(--ink); }
+    .check .expect {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-top: 2px;
+    }
+
+    .ticket {
+      background: #fbfcfb;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 12px 0;
+    }
+
+    .ticket h4 {
+      margin: 8px 0 6px;
+      font-size: 1rem;
+    }
+
+    .ticket .status {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .ticket.ready .status { background: var(--do-bg); color: var(--do); }
+    .ticket.done .status { background: var(--accent-soft); color: var(--accent); }
+    .ticket.later .status { background: var(--warn-bg); color: var(--warn); }
+
+    .ticket p { margin: 0 0 8px; }
+    .ticket ol { margin: 0; padding-left: 1.2rem; }
+    .ticket li { margin: 0 0 4px; font-size: 0.92rem; }
+
+    .stages {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 18px 0 8px;
+    }
+
+    .stage {
+      background: var(--accent-soft);
+      border: 1px solid #c9d7ea;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .stage b {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .stage small {
+      color: var(--muted);
+      display: block;
+      line-height: 1.4;
+    }
+
+    footer {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    footer a { color: var(--accent); }
+
+    .progress {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(246, 247, 244, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .progress strong { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="progress">
+    Checklist progress: <strong id="progressText">0 / 0 checked</strong>
+  </div>
+
+  <div class="wrap">
+    <header class="hero">
+      <h1>Data Lifecycle testing guide</h1>
+      <p>
+        Simple view of <strong>what you should do</strong> and
+        <strong>what you must not do</strong> when checking Active → Inactive → Archived → Deleted.
+        Tick each check as you go. Start with the changes list.
+      </p>
+      <div class="meta">
+        <span class="chip">Branch: fix/TEST-93-TEST-94-org-archive-and-deleted-users</span>
+        <span class="chip">Updated: 2026-10-14</span>
+        <span class="chip"><a href="index.html">All guides</a></span>
+        <span class="chip"><a href="../DATA_LIFECYCLE_MANUAL_TESTING.md">Source notes</a></span>
+      </div>
+    </header>
+
+    <div class="banner-warn">
+      ⚠️ Never update the legacy database. Test only on the local/app database.
+    </div>
+
+    <div class="stages">
+      <div class="stage">
+        <b>Active</b>
+        <small>Live and visible. Org + IW can manage in normal lists.</small>
+      </div>
+      <div class="stage">
+        <b>Inactive</b>
+        <small>Still in the organisation. The organisation can set them active again.</small>
+      </div>
+      <div class="stage">
+        <b>Archived</b>
+        <small>Hidden from the organisation. Only IW can restore. One organisation at a time.</small>
+      </div>
+      <div class="stage">
+        <b>Deleted</b>
+        <small>Anonymised record. The word on screen is Delete. Not reversible.</small>
+      </div>
+    </div>
+
+    <nav class="toc" aria-label="Phases">
+      <a href="#users">1. Users<span>Tenant + Admin</span></a>
+      <a href="#products">2. Products<span>Admin catalogue</span></a>
+      <a href="#orgs">3. Organisations<span>Archive + login</span></a>
+      <a href="#certs">4. Certificates<span>Org vs learner</span></a>
+      <a href="#events">5. Events / Trainers<span>Rules</span></a>
+      <a href="#hold">6. Hold delete<span>5 second confirm</span></a>
+      <a href="#erase">7. Delete<span>Anonymise</span></a>
+    </nav>
+
+    <section class="changes" id="changes">
+      <h2>Changes to test</h2>
+      <p>Tick these before the older phase checks. Every Jira ticket is listed under <a href="#tickets">All tickets</a> with its name, what it asked for, and how to test it.</p>
+      <div class="checks">
+        <label class="check"><input type="checkbox" /><span><strong>T75</strong> On Manage users, the Inactive count matches the rows. People archived the old way (account soft-deleted, not anonymised) appear here. Set active brings them back.<span class="expect">/users/manage-users</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U-org</strong> Organisation sees Active and Inactive only. Set inactive is reversible. Archive shows a warning, then the person leaves this organisation. The organisation cannot undo Archive.<span class="expect">Other organisations unchanged</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U-iw</strong> IW sees Active, Inactive, Archived, and Deleted. Archive is for one organisation and records who archived. Unarchive asks Active or Inactive, and whether to include registrations and certificates.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Del</strong> Delete is on the row menu only. Form asks for first name, last name, reason (200 characters), a confirmation tick, and a hold. The Deleted tab shows the anonymised record. Deleting in one organisation does not anonymise the person in another organisation.<span class="expect">Word on screen is Delete</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Prod</strong> Products: select several and Set as inactive. On the Inactive tab, Set as active. Archive is still a separate soft-delete.<span class="expect">/admin/products/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Org</strong> After archive or unarchive, the organisation list refreshes and the row is on the correct tab.<span class="expect">/admin/organisations/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Link</strong> Linking accounts keeps both accounts. It does not merge them. The organisation still shows the organisation email, never the personal email. A switched-off organisation email cannot sign in.<span class="expect">Message points to a personal or other organisation email</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Cert</strong> Certificates follow users. Organisation: Active and Inactive, Set inactive is reversible, Archive warns and hides the certificate. IW also has Archived and can unarchive to active or inactive. The tab count matches the rows. There is no Deleted tab for certificates yet.<span class="expect">/courses/certificates</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Learner</strong> A personal login with no organisation opens <code>/learner</code>. Courses, certificates, and an assigned licence stay available. Past organisations are listed on the account profile. A new organisation later does not replace that learner record.<span class="expect">/learner and /settings/account</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>Events</strong> A completed or cancelled event stays on the Active list until it is archived. Archive stops a new booking. The learner still sees an event they already booked. A new event only offers a trainer whose trainer role is still active.<span class="expect">/admin/events and /admin/trainers</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T77</strong> On the organisation Inactive tab, Archive is on the row menu and in bulk actions, next to Set active.<span class="expect">/users/manage-users</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T78</strong> On the IW Archived tab, the row menu includes Unarchive. It asks Active or Inactive, plus registrations and certificates.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T79</strong> On the IW Inactive tab, filtering by organisation returns only inactive people in that organisation. A single creation date is “on or after” that day; set both bounds to the same day for that day only.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T87</strong> On the IW Inactive tab, the number on the tab matches the number of rows. The tab no longer counts one person the table does not show.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T86</strong> Delete user uses the same width as Archive user. It does not stretch across the screen.<span class="expect">Row menu → Delete</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T93</strong> On the IW Deleted tab, bulk Actions does not offer Delete. The row menu still has no Delete. A deleted person cannot be deleted again.<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T94</strong> Edit Organisation shows Lifecycle status. The three-dot menu can Archive or Unarchive. The organisation view menu can do the same, next to Edit Organisation.<span class="expect">/admin/organisations/…/edit</span></span></label>
+      </div>
+
+    </section>
+
+    <section class="changes" id="tickets">
+      <h2>All tickets</h2>
+      <p>Jira still shows the ready tickets as in progress. They are in this build. The later tickets are written here so the ask is clear. Do not fail this build for them.</p>
+
+      <h3>Ready in this build</h3>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-74 — Link organisation email to personal email to create learner record</h4>
+        <p>Linking is not a merge. Org A’s account <code>l@orga.com</code> and Org B’s account <code>l@orgb.com</code> stay separate. The learner adds <code>l@primary.com</code> on one of them. When the other address already belongs to an account, linking asks for one new password. That password is the one used next time, from either email. Org A still sees only <code>l@orga.com</code>. Org B still sees only <code>l@orgb.com</code>.</p>
+        <ol>
+          <li>Create the learner in Org A with <code>l@orga.com</code>, and in Org B with <code>l@orgb.com</code>.</li>
+          <li>Sign in as the Org A account. On <code>/settings/security</code>, add <code>l@orgb.com</code> and open the verification link.</li>
+          <li>Set a password and confirm it, then choose <strong>Link accounts</strong>. Sign out. Sign in with <code>l@orga.com</code> or <code>l@orgb.com</code> and that new password.</li>
+          <li>As Org A, open the learner. The email is <code>l@orga.com</code>. As Org B, the email is <code>l@orgb.com</code>. Each organisation list shows <strong>Linked account</strong> under the email, and does not show the other organisation’s email.</li>
+          <li>On <code>/admin/users/list</code> both people are still separate rows. Under <code>l@orga.com</code> the row says <strong>Linked to l@orgb.com</strong>. Under <code>l@orgb.com</code> it says <strong>Linked to l@orga.com</strong>.</li>
+          <li>Org A archives the learner. Org B can still open them and their Org B courses. On <code>/settings/account</code> the learner still sees Org A as a past employer.</li>
+          <li>IW unarchives them back to Org A with the same email, choosing Active. The profile shows a past archived period and a new <strong>Rehired</strong> period. New courses belong to the new period. The old courses stay on the past period.</li>
+          <li>On <code>/settings/privacy</code>, leave Workplace DNA scores unshared. Org B does not receive a score that also includes Org A. Share Org A’s score with Org B. Org B can then see that shared score. Org A still sees its own score without that share.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-83 — Archiving user: update warning message in Organisation portal</h4>
+        <p>The organisation archive warning now uses David’s longer text. One user includes their name. Several users say “these users”. The text explains that only IW can restore an archive, that Set inactive is the reversible choice, and that reports can count archived learners without showing their names.</p>
+        <ol>
+          <li>Open <code>/users/manage-users</code> as an organisation owner.</li>
+          <li>On one row, choose <strong>Archive</strong>. The first sentence is “Are you sure you want to archive this user, {their name}?” and includes “but you won’t be able to see the names of archived users in the data.”</li>
+          <li>Tick two people and choose <strong>Archive selected</strong>. The warning says “these users” and uses the same paragraphs.</li>
+          <li>Cancel. The people stay on the list.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>Set password — IW admin only</h4>
+        <p>On the IW user list, Set password is on the row menu only when the admin has Set user password. That permission is on the IW Owner role. Another admin role does not see it. The two linked accounts stay two users, so the password changes only the row you open.</p>
+        <ol>
+          <li>Open <code>/admin/users/list</code> as an IW Owner. On a row, choose <strong>Set password</strong>, enter it twice, and choose <strong>Update password</strong>.</li>
+          <li>Sign in as that person with the new password.</li>
+          <li>Sign in as an admin who is not an IW Owner. Set password is not on the row menu.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-72 — Archiving Product: set inactive not added to list of bulk actions (Test P2)</h4>
+        <p>A product can be set inactive from the row menu. The same action was missing when several products were ticked.</p>
+        <ol>
+          <li>Open <code>/admin/products/list</code> on Active.</li>
+          <li>Tick two products. Open bulk actions and choose <strong>Set as inactive</strong>.</li>
+          <li>Open Inactive. Both products are there, and they are not on Archived.</li>
+          <li>On Inactive, tick them and choose <strong>Set as active</strong>. They return to Active.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-73 — Archive Organisations: list does not refresh when Organisation archived / unarchived</h4>
+        <p>Archive and unarchive succeeded, but the organisation list stayed on the old tab until the page was reloaded.</p>
+        <ol>
+          <li>Open <code>/admin/organisations/list</code>.</li>
+          <li>Archive one organisation. The list refreshes by itself. The organisation leaves Active and appears on Archived.</li>
+          <li>On Archived, unarchive it. The list refreshes again and the organisation is back on Active.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-75 — Archiving users not working correctly on Staging</h4>
+        <p>On Manage users the Inactive tab counted people, including older switched-off accounts, while the table showed no rows.</p>
+        <ol>
+          <li>Open <code>/users/manage-users</code> as an organisation owner.</li>
+          <li>Open <strong>Inactive</strong>. The number on the tab equals the number of rows, including older accounts that were switched off before this change.</li>
+          <li>Choose <strong>Set active</strong> on one row. That person moves to Active, and both counts change by one.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-77 — Archiving: can't archive users who've been set as inactive in Organisation portal</h4>
+        <p>An organisation could not archive someone who was already inactive. Archive belongs on the row menu and in bulk actions.</p>
+        <ol>
+          <li>Stay on <code>/users/manage-users</code>, Inactive tab.</li>
+          <li>Open one row menu. <strong>Archive</strong> is there, next to Set active.</li>
+          <li>Tick two inactive people. Bulk actions include <strong>Archive selected</strong>.</li>
+          <li>Confirm. They leave this organisation. Another organisation they belong to is unchanged. This organisation cannot bring them back.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-78 — Archiving: No option to unarchive users from 3-dots menu in IW admin portal</h4>
+        <p>IW could not unarchive a user from the row menu on the Archived tab.</p>
+        <ol>
+          <li>Open <code>/admin/users/list</code> as an IW admin and open <strong>Archived</strong>.</li>
+          <li>Open the row menu and choose <strong>Unarchive</strong>.</li>
+          <li>Choose Active or Inactive, and whether registrations and certificates come back.</li>
+          <li>Confirm. The person leaves Archived and appears on the tab you chose.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-79 — Filter doesn’t work on IW admin when viewing inactive learners</h4>
+        <p>Maria Doyle was inactive at OCS, but filtering the IW Inactive list by that organisation returned nobody. A creation date also returned people from other days.</p>
+        <ol>
+          <li>On <code>/admin/users/list</code>, open <strong>Inactive</strong>.</li>
+          <li>Filter Organisation to one organisation. Every row is an inactive person in that organisation.</li>
+          <li>Open Created At. <strong>On or after</strong> alone keeps that day and later. Set both bounds to the same day and the list keeps that day only.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-86 — User deletion pop up form too wide</h4>
+        <p>The Delete user form stretched across the screen. It should be the same width as Archive user.</p>
+        <ol>
+          <li>On <code>/users/manage-users</code> or <code>/admin/users/list</code>, open the row menu and choose <strong>Archive</strong>. Note the card width.</li>
+          <li>Close it and open <strong>Delete</strong> on a row. The card is the same width.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-87 — Inactive users tab shows different number from rows in Admin portal</h4>
+        <p>On the IW user list the Inactive tab said 15 while the table showed 14 rows.</p>
+        <ol>
+          <li>Open <code>/admin/users/list</code> as an IW admin and open <strong>Inactive</strong>.</li>
+          <li>The number on the tab equals the number of rows.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-93 — Remove option to delete an already deleted user from bulk Actions</h4>
+        <p>The Deleted tab still offered <strong>Delete Selected</strong> under Actions. That call fails, because the person is already deleted. The row menu already hid Delete. Actions on this tab no longer includes it.</p>
+        <ol>
+          <li>Open <code>/admin/users/list</code> as an IW admin who can view deleted users, and open <strong>Deleted</strong>.</li>
+          <li>Tick one or more rows. <strong>Actions</strong> does not include <strong>Delete Selected</strong>. With nothing else to do on this tab, Actions is not shown.</li>
+          <li>Open a row menu. Delete is still absent. View remains.</li>
+          <li>On Active or Inactive, Actions still includes the actions for that tab. Delete of a live user stays on the row menu.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-94 — Allow Organisation to be archived from Edit Organisation</h4>
+        <p>Archive was only on the organisation list. The edit page now shows Lifecycle status, and its three-dot menu can archive or unarchive. The organisation view menu can do the same, next to Edit Organisation.</p>
+        <ol>
+          <li>Open an active organisation at <code>/admin/organisations/…/edit</code>. The header says <strong>Lifecycle status</strong> <strong>Active</strong>.</li>
+          <li>Open the three-dot menu and choose <strong>Archive</strong>. The status changes to <strong>Archived</strong> without leaving the page. The menu now says <strong>Unarchive</strong>.</li>
+          <li>Open <code>/admin/organisations/list</code> on Archived. That organisation is there.</li>
+          <li>Open the organisation view page. The three-dot menu includes <strong>Unarchive</strong> next to Edit Organisation, and the details show Lifecycle status Archived.</li>
+          <li>Choose <strong>Unarchive</strong>. The status returns to Active, and the organisation is back on the Active list.</li>
+        </ol>
+      </article>
+
+      <h3>Already marked Done</h3>
+
+      <article class="ticket done">
+        <span class="status">Done</span>
+        <h4>CEA-39 — Archive 'retired' products</h4>
+        <p>Products needed an archive, so a retired product stays in history and reports instead of being deleted from the catalogue.</p>
+        <ol>
+          <li>On <code>/admin/products/list</code>, archive a product. It leaves Active and appears on Archived.</li>
+          <li>Learner history and past orders still name that product.</li>
+        </ol>
+      </article>
+
+      <article class="ticket done">
+        <span class="status">Done</span>
+        <h4>TEST-18 — Filtering doesn't work on archived data</h4>
+        <p>Filters on an Archived tab, starting with products, did not apply to the archived rows.</p>
+        <ol>
+          <li>Open <code>/admin/products/list</code>, Archived tab.</li>
+          <li>Filter by a value you can see on one archived row. Only matching archived products remain.</li>
+        </ol>
+      </article>
+
+      <article class="ticket done">
+        <span class="status">Done</span>
+        <h4>TEST-19 — Archiving UI issues</h4>
+        <p>Unarchiving the last archived products left a blank page, and an Archived tab still showed when its count was zero.</p>
+        <ol>
+          <li>Unarchive the last product on the Archived tab. The product list loads again with that product on Active.</li>
+          <li>On a list with nothing archived, the Archived tab is hidden.</li>
+        </ol>
+      </article>
+
+      <article class="ticket done">
+        <span class="status">Done</span>
+        <h4>TEST-38 — Filter doesn't work on archived registrations</h4>
+        <p>Filtering archived registrations by last name returned no rows.</p>
+        <ol>
+          <li>Open archived registrations.</li>
+          <li>Filter by a last name that is on an archived row. That registration stays in the list.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-91 — User account creation / verification problem</h4>
+        <p>Tracy Wilson and Rob Watson already had OCS accounts. JCB accounts were created for tracy.wilson@jcb.com and rob.watson@jcb.com. The first verification email did not arrive. The follow-up link opened the new-organisation form with Company Name JCB, Industry Construction, and Total Employees 1–50 already filled in, and Next did nothing. An invited person is no longer asked to create an organisation. Signing in before the email is confirmed sends the confirm-email message straight away. A self-signup still sees the company form, and Next submits the values on screen.</p>
+        <ol>
+          <li>Add a new person to an existing organisation. Sign in with the password from the reset or invite email before the address is confirmed.</li>
+          <li>Mailhog receives a confirm-email message on that sign-in, without using Resend. The message does not ask them to create an organisation.</li>
+          <li>Open the link. The company form does not appear. The person lands in the app they can use.</li>
+          <li>Start a brand-new organisation signup, open its verification link, fill company name, industry, and employees, and choose Next. The organisation is created.</li>
+        </ol>
+      </article>
+
+      <article class="ticket ready">
+        <span class="status">Ready</span>
+        <h4>TEST-88 — View deleted users in Admin portal allows me to see personal data of deleted user</h4>
+        <p>The Deleted tab and the user view show an anonymised name and email, plus the reason from the deletion form. Attribute values and linked personal emails are not shown. A person deleted earlier who still had a real name on the Deleted tab is shown as anonymised, and the stored record is repaired.</p>
+        <ol>
+          <li>Delete a test user from the row menu and open the Deleted tab. The name and email are anonymised, and the deletion reason is on the row.</li>
+          <li>Open that user. The details show the anonymised name, the anonymised email, and the deletion reason. The original name, email, and attribute values are not shown.</li>
+          <li>Open a person who was deleted before this build. The Deleted tab no longer shows their real name or email.</li>
+        </ol>
+      </article>
+
+      <h3>Not in this build</h3>
+      <p>These are not done. CEA-137 is In Progress because it is the parent ticket. TEST-81, TEST-84, TEST-85, TEST-89, and TEST-90 are still Open. Do not mark them passed.</p>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>CEA-137 — Manage archiving</h4>
+        <p>Parent ticket for one archiving approach across users, events, certificates, products, and organisations. The list work above is part of it. Report toggles are still waiting on a report specification. The Question Set file is comments, not that specification.</p>
+        <ol>
+          <li>Do not test report include or exclude toggles in this build.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-81 — IOSH certificate list UI and functions in the IW admin portal</h4>
+        <p>IW needs to archive and unarchive an IOSH certificate on its own, with the usual tabs. The PDF anonymisation question is recorded as no immediate action. A certificate Deleted tab waits for the 6-year job.</p>
+        <ol>
+          <li>Do not test a certificate Deleted tab, or a change to stored certificate PDFs, in this build.</li>
+          <li>Certificates that are already built stop at Active, Inactive, and Archived. IW can unarchive to active or inactive.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-84 — Filtering all / active / inactive / archived / deleted user-related data in Reports and Performance</h4>
+        <p>Reports should let an organisation include or exclude inactive, archived, and deleted people, show the lifecycle on each row, and show anonymised names for archived and deleted people.</p>
+        <ol>
+          <li>Do not test this. Report pages are still placeholders.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-85 — Creat new field: deletion cause category (autofilled)</h4>
+        <p>A deletion should be labelled automatically as User request or Information and Records Management policy. David notes the 6-year rule is undefined: six years after what, and whether it covers personal records only or all organisation data.</p>
+        <ol>
+          <li>Do not test a deletion-cause field or the 6-year job in this build.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-89 — Multipe user deletion requests: bug and further considerations</h4>
+        <p>IW should be able to delete several users at once and still enter a reason. Organisation owners stay on one row at a time. Steve Mcqueen and Steven Wynn at OCS were deleted together and landed on Archived instead of Deleted.</p>
+        <ol>
+          <li>Do not test bulk delete. Delete remains on the row menu, one person at a time, with a reason.</li>
+        </ol>
+      </article>
+
+      <article class="ticket later">
+        <span class="status">Later</span>
+        <h4>TEST-90 — Archving products: bugs and suggestions</h4>
+        <p>Three leftovers: the bulk-action button label should not imply a single action, HubSpot must be checked for active, inactive, and archived products, and the archive warning’s last paragraph should use David’s HubSpot wording at one text size.</p>
+        <ol>
+          <li>Do not test the button label, HubSpot sync, or the revised warning in this build.</li>
+          <li>Set as inactive in bulk is TEST-72, and that part is ready.</li>
+        </ol>
+      </article>
+    </section>
+
+    <!-- USERS -->
+    <section class="phase" id="users">
+      <h2>1. Users</h2>
+      <p class="url">Tenant users list · /admin/users/list</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Organisation: <strong>Set inactive</strong> to pause someone. <strong>Set active</strong> brings them back.</li>
+            <li>Organisation: <strong>Archive</strong> hides them from this organisation only, including people already set inactive. Only IW can restore that.</li>
+            <li>IW Archived tab: <strong>Unarchive</strong> is on the row menu as well as the bulk action.</li>
+            <li>Confirm the Inactive tab count equals the number of rows, including older archived accounts that were soft-deleted.</li>
+            <li>IW: archive one organisation, then unarchive and choose Active or Inactive, plus registrations and certificates.</li>
+            <li>Use <strong>Delete</strong> on the row only when the record should be anonymised.</li>
+            <li>On the IW Deleted tab, do not look for Delete in bulk Actions. It is removed. The row menu already hides it.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t expect the organisation to see an Archived or Deleted tab.</li>
+            <li>Don’t expect Archive in one organisation to change another organisation or the personal login.</li>
+            <li>Don’t expect the organisation to undo an archive.</li>
+            <li>Don’t delete a Platform Owner or your own account casually.</li>
+            <li>Don’t expect to delete a user who is already on the Deleted tab.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>U1</strong> Active tab shows active members only<span class="expect">Tenant users list → Active</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U2</strong> Set inactive keeps the person on the Inactive tab for this organisation only<span class="expect">Count matches rows</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U3</strong> Set active returns an inactive person to Active<span class="expect">Including older soft-deleted accounts</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>U4</strong> Archive hides them from this organisation. Another organisation is unchanged<span class="expect">Org cannot unarchive</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A1</strong> IW Archive affects one organisation and stores who archived<span class="expect">/admin/users/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A2</strong> IW Unarchive can return them to Active or Inactive<span class="expect">Optional registrations and certificates</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>A3</strong> Delete anonymises after the form and hold<span class="expect">Deleted tab shows the shell</span></span></label>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="phase" id="products">
+      <h2>2. Products</h2>
+      <p class="url">/admin/products/list</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Use tabs: <strong>Active</strong> / <strong>Inactive</strong> / <strong>Archived</strong>.</li>
+            <li>Select several products and use <strong>Set as inactive</strong>. On the Inactive tab, <strong>Set as active</strong> brings them back. That is not Archive.</li>
+            <li>Use <strong>Archive</strong> only when product should leave the catalogue (soft-delete).</li>
+            <li>Unarchive and choose Active or Inactive.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t treat Inactive the same as Archived.</li>
+            <li>Don’t hard-delete products (no Erased for products).</li>
+            <li>Don’t assign Inactive or Archived products to new orders.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>P1</strong> Three tabs show the right products<span class="expect">Active vs Inactive vs Archived</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>P2</strong> Set Inactive keeps product not soft-deleted<span class="expect">Appears on Inactive tab</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>P3</strong> Archive soft-deletes; Unarchive restores as Active/Inactive<span class="expect">Archived tab</span></span></label>
+      </div>
+    </section>
+
+    <!-- ORGS -->
+    <section class="phase" id="orgs">
+      <h2>3. Organisations</h2>
+      <p class="url">/admin/organisations/list</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Archive an organisation and confirm the list refreshes onto the Archived tab without a reload.</li>
+            <li>Unarchive it and confirm the list refreshes back to Active without a reload.</li>
+            <li>On Edit Organisation, read <strong>Lifecycle status</strong> and use the three-dot menu to Archive or Unarchive. The view page menu can do the same.</li>
+            <li>Confirm login to an archived org is blocked.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t hard-delete organisations.</li>
+            <li>Don’t expect users to open an archived org portal.</li>
+            <li>Don’t touch legacy DB while testing.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>O1</strong> Archive Selected moves org to Archived<span class="expect">/admin/organisations/list</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>O2</strong> Unarchive restores org to Active<span class="expect">Archived tab</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>O3</strong> Login with archived org unique_id fails<span class="expect">Unauthorized / not available</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>O4</strong> Edit Organisation shows Lifecycle status and can Archive or Unarchive from the three-dot menu<span class="expect">View menu can do the same</span></span></label>
+      </div>
+    </section>
+
+    <!-- CERTS -->
+    <section class="phase" id="certs">
+      <h2>4. Certificates</h2>
+      <p class="url">/courses/certificates · /courses/my-certificates</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Organisation tabs: <strong>Active</strong> and <strong>Inactive</strong>.</li>
+            <li><strong>Set inactive</strong> is reversible with <strong>Set active</strong>.</li>
+            <li><strong>Archive</strong> warns, then hides the certificate. Only IW sees Archived and can unarchive to active or inactive.</li>
+            <li>Confirm the tab count matches the rows.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t expect the organisation to see an Archived tab or to undo an archive.</li>
+            <li>Don’t expect a Deleted tab for certificates. That waits for the 6-year job.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>C1</strong> Set inactive moves the certificate to Inactive, and Set active brings it back<span class="expect">Count matches rows</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C2</strong> Archive hides it from the organisation. IW Archived tab can restore it<span class="expect">/courses/certificates</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>C3</strong> Learner still sees their own certificates<span class="expect">/courses/my-certificates</span></span></label>
+      </div>
+    </section>
+
+    <!-- EVENTS -->
+    <section class="phase" id="events">
+      <h2>5. Events / Trainers</h2>
+      <p class="url">/admin/events · /admin/trainers</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Leave a completed or cancelled event on the Active list until someone archives it.</li>
+            <li>Archive events only when status is <strong>completed</strong> or <strong>cancelled</strong>.</li>
+            <li>After archive, confirm a new booking is refused and the learner’s existing booking is still in their history.</li>
+            <li>Archive trainer = remove trainer role assignment (user can remain). A new event does not offer that trainer.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t archive draft/live/in-progress events (should fail).</li>
+            <li>Don’t expect completing an event to hide it, or archive to remove a booking the learner already has.</li>
+            <li>Don’t confuse trainer archive with full user erase.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>E1</strong> Completed/cancelled event archives OK<span class="expect">Appears in Archived</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>E2</strong> Draft/live archive is blocked<span class="expect">Error / 422</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>E3</strong> A new booking on a completed, cancelled, or archived event is refused. The learner still sees an event they already booked.<span class="expect">History stays</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>T1</strong> Trainer archive soft-deletes role only, and that person is not offered for a new event<span class="expect">User record remains</span></span></label>
+      </div>
+    </section>
+
+    <!-- HOLD -->
+    <section class="phase" id="hold">
+      <h2>6. Hold-to-confirm delete (5 seconds)</h2>
+      <p class="url">Any DeleteResourceForm modal · Delete user</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Press and <strong>hold ~5 seconds</strong> to confirm destructive actions.</li>
+            <li>Release early to cancel safely.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t expect a single quick click to delete anymore.</li>
+            <li>Don’t assume Delete is the same as Archive. Delete anonymises.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>H1</strong> Release early → nothing deleted<span class="expect">Progress resets</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>H2</strong> Hold 5s → delete/detach runs<span class="expect">DeleteResourceForm</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>H3</strong> Delete user hold works after the form is complete<span class="expect">/admin/users/list and organisation users</span></span></label>
+      </div>
+    </section>
+
+    <!-- ERASE -->
+    <section class="phase" id="erase">
+      <h2>7. Delete (anonymise — users only)</h2>
+      <p class="url">Row menu → Delete, on organisation users and /admin/users/list</p>
+      <div class="grid-2">
+        <div class="panel do">
+          <h3>✅ Do</h3>
+          <ul>
+            <li>Use Delete only when the person should be anonymised.</li>
+            <li>Fill in first name, last name, a reason of at most 200 characters, and the confirmation tick, then hold to confirm.</li>
+            <li>Expect the Deleted tab only for an IW admin with <strong>View Deleted users</strong> (<code>admin:organisation:deleted_users:view</code>). Open the shell from the row menu. It cannot be recovered or edited.</li>
+          </ul>
+        </div>
+        <div class="panel dont">
+          <h3>❌ Don’t</h3>
+          <ul>
+            <li>Don’t delete products or organisations this way.</li>
+            <li>Don’t expect Delete to be reversible.</li>
+            <li>Don’t use Delete when Inactive or Archive is enough.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="checks">
+        <h3>Tick when done</h3>
+        <label class="check"><input type="checkbox" /><span><strong>X1</strong> Deleted user shows an anonymised name and email on the Deleted tab<span class="expect">erased-…@anonymized.invalid</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>X2</strong> Deleted user cannot log in with the old email<span class="expect">Login fails</span></span></label>
+        <label class="check"><input type="checkbox" /><span><strong>X3</strong> The Deleted tab shows only when the admin has View Deleted users. View opens the anonymised record. Edit is not offered, and saving a change is refused.<span class="expect">/admin/users/list</span></span></label>
+      </div>
+    </section>
+
+    <section class="changes" id="remaining">
+      <h2>Remaining — not in this build</h2>
+      <p>Leave these. The name, the ask, and what not to test are under <a href="#tickets">All tickets</a>: CEA-137, TEST-81, TEST-84, TEST-85, TEST-89, and TEST-90.</p>
+    </section>
+
+    <footer>
+      Open this file in a browser from
+      <code>docs/testing/DATA_LIFECYCLE_MANUAL_TESTING.html</code>.
+      Back to <a href="index.html">all testing guides</a>.
+      Checklist state is saved in this browser only.
+    </footer>
+  </div>
+
+  <script>
+    const KEY = 'lifecycle-manual-test-checks-v6';
+    const boxes = [...document.querySelectorAll('.check input[type="checkbox"]')];
+    const progressText = document.getElementById('progressText');
+
+    function load() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+        boxes.forEach((box, index) => {
+          box.checked = Boolean(saved[index]);
+        });
+      } catch (_) {}
+      updateProgress();
+    }
+
+    function save() {
+      const data = {};
+      boxes.forEach((box, index) => {
+        data[index] = box.checked;
+      });
+      localStorage.setItem(KEY, JSON.stringify(data));
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const total = boxes.length;
+      const done = boxes.filter((b) => b.checked).length;
+      progressText.textContent = `${done} / ${total} checked`;
+    }
+
+    boxes.forEach((box) => box.addEventListener('change', save));
+    load();
+  </script>
+</body>
+</html>

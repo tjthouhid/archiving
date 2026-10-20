@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEST-95 — Add user page refresh</title>
+  <style>
+    :root {
+      --bg: #f6f7f4;
+      --card: #ffffff;
+      --ink: #1a1f1c;
+      --muted: #5c675f;
+      --line: #d9e0da;
+      --accent: #1d4e89;
+      --do: #0f6b3c;
+      --do-bg: #e8f6ee;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(26, 31, 28, 0.06);
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, #eef5ff 0, transparent 28%),
+        radial-gradient(circle at top right, #edf8f1 0, transparent 24%),
+        var(--bg);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    header.hero {
+      background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%);
+      color: #fff;
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.02em; }
+    header.hero p { margin: 0; opacity: 0.92; }
+    a { color: var(--accent); }
+    header.hero a { color: #fff; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    ul { margin: 8px 0 0; padding-left: 1.2rem; }
+    label.check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+    label.check:first-of-type { border-top: 0; }
+    .pass { background: var(--do-bg); color: var(--do); border-radius: var(--radius); padding: 12px 14px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TEST-95 — Add user page refresh</h1>
+      <p>After an organisation owner creates a user, the add-user page returns to a blank form and still shows the success message.</p>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-95">Jira TEST-95</a></p>
+    </header>
+
+    <section class="card">
+      <h2>What changed</h2>
+      <p>Creating a user at <code>/users/add</code> used to leave the name, email, and role filled in. A successful create now clears those fields, custom fields, and classifications, and leaves the green success message in place. Editing an existing user does not clear the form.</p>
+    </section>
+
+    <section class="card">
+      <h2>Checks</h2>
+      <p class="pass">Sign in as an organisation owner. Open <code>/users/add</code>.</p>
+      <label class="check"><input type="checkbox" data-id="blank-start" /> The form starts blank.</label>
+      <label class="check"><input type="checkbox" data-id="create" /> Enter a first name, last name, email, and role, then choose Create user.</label>
+      <label class="check"><input type="checkbox" data-id="success" /> A green success message says the user was created and will receive a sign-up link.</label>
+      <label class="check"><input type="checkbox" data-id="cleared" /> First name, last name, email, role, custom fields, and classifications are empty again.</label>
+      <label class="check"><input type="checkbox" data-id="second" /> Create a second user on the same page without reloading. That user is also created, and the form is blank again.</label>
+      <label class="check"><input type="checkbox" data-id="edit" /> Open an existing user and save a change. The edit form keeps that user’s details.</label>
+      <label class="check"><input type="checkbox" data-id="error" /> Submit the add form with a required field missing. The values you typed stay on the page and no success message appears.</label>
+    </section>
+  </div>
+  <script>
+    const key = 'testing-test-95';
+    const boxes = document.querySelectorAll('input[type="checkbox"][data-id]');
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    boxes.forEach((box) => {
+      box.checked = Boolean(saved[box.dataset.id]);
+      box.addEventListener('change', () => {
+        const next = JSON.parse(localStorage.getItem(key) || '{}');
+        next[box.dataset.id] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+  </script>
+</body>
+</html>
