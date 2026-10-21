@@ -77,6 +77,16 @@
       <label class="check"><input type="checkbox" data-id="many" /> Select several products and archive them. The same paragraph appears, and the product names are the same size as the rest of the warning.</label>
       <label class="check"><input type="checkbox" data-id="cancel" /> Cancel both dialogs. No product is archived.</label>
     </section>
+
+    <section class="card">
+      <h2>HubSpot sync — check with Vinny and Simon</h2>
+      <p>Do this by hand in HubSpot. Workplace DNA does not send a separate Archived status. Archiving a product sets it to Inactive, then syncs HubSpot <code>hs_status</code> to inactive. HubSpot’s own Active, Inactive, and Archived lists may still be updated by a HubSpot workflow.</p>
+      <label class="check"><input type="checkbox" data-id="hs-active" /> Pick a product that is Active and Public, and already synced. In HubSpot its status is Active.</label>
+      <label class="check"><input type="checkbox" data-id="hs-inactive" /> Set that product to Inactive in Workplace DNA, without archiving it. After sync, HubSpot shows Inactive. It is not on HubSpot’s Archived list unless a workflow put it there.</label>
+      <label class="check"><input type="checkbox" data-id="hs-archive" /> Archive the product in Workplace DNA. After sync, HubSpot shows Inactive. Note whether HubSpot’s Archived list changed because of this sync, or only because of a HubSpot workflow.</label>
+      <label class="check"><input type="checkbox" data-id="hs-unarchive" /> Unarchive the product and set it back to Active and Public. After sync, HubSpot shows Active again.</label>
+      <label class="check"><input type="checkbox" data-id="hs-agree" /> With Vinny and Simon, agree which HubSpot list is filled by Workplace DNA and which list is filled by a HubSpot workflow.</label>
+    </section>
   </div>
   <script>
     const key = 'testing-test-90';

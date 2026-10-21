@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEST-70 — Personal learning record banner</title>
+  <style>
+    :root { --bg: #f6f7f4; --card: #fff; --ink: #1a1f1c; --line: #d9e0da; --accent: #1d4e89; --shadow: 0 10px 30px rgba(26, 31, 28, 0.06); --font: "Segoe UI", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); color: var(--ink); background: radial-gradient(circle at top left, #eef5ff 0, transparent 28%), var(--bg); line-height: 1.5; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    header.hero { background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%); color: #fff; border-radius: 22px; padding: 28px; box-shadow: var(--shadow); margin-bottom: 22px; }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
+    header.hero p { margin: 0; opacity: 0.92; }
+    header.hero a { color: #fff; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    label.check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
+    label.check:first-of-type { border-top: 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TEST-70 — Personal learning record banner</h1>
+      <p>The banner under the navigation uses the personal learning record wording.</p>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-70">Jira TEST-70</a></p>
+    </header>
+    <section class="card">
+      <h2>What changed</h2>
+      <p>For a learner who has not set a primary email, the banner no longer says “Add a personal primary email”. It uses the same personal learning record explanation as Settings → Security, and still links to <code>/settings/security</code>.</p>
+    </section>
+    <section class="card">
+      <h2>Checks</h2>
+      <label class="check"><input type="checkbox" data-id="banner" /> Sign in as a learner who has not set a primary email. The banner heading is “Your personal learning record”.</label>
+      <label class="check"><input type="checkbox" data-id="copy" /> The banner includes the lasting-record paragraph, the verification paragraph, and the learner-privacy paragraph.</label>
+      <label class="check"><input type="checkbox" data-id="link" /> Email settings opens <code>/settings/security</code>.</label>
+      <label class="check"><input type="checkbox" data-id="dismiss" /> Dismiss the banner. It stays hidden on the next page.</label>
+    </section>
+  </div>
+  <script>
+    const key = 'testing-test-70';
+    const boxes = document.querySelectorAll('input[type="checkbox"][data-id]');
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    boxes.forEach((box) => {
+      box.checked = Boolean(saved[box.dataset.id]);
+      box.addEventListener('change', () => {
+        const next = JSON.parse(localStorage.getItem(key) || '{}');
+        next[box.dataset.id] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+  </script>
+</body>
+</html>
