@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEST-89 — Bulk user delete</title>
+  <style>
+    :root { --bg: #f6f7f4; --card: #fff; --ink: #1a1f1c; --line: #d9e0da; --accent: #1d4e89; --shadow: 0 10px 30px rgba(26, 31, 28, 0.06); --font: "Segoe UI", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); color: var(--ink); background: radial-gradient(circle at top left, #eef5ff 0, transparent 28%), var(--bg); line-height: 1.5; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    header.hero { background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%); color: #fff; border-radius: 22px; padding: 28px; box-shadow: var(--shadow); margin-bottom: 22px; }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
+    header.hero p { margin: 0; opacity: 0.92; }
+    header.hero a { color: #fff; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    label.check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
+    label.check:first-of-type { border-top: 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TEST-89 — Bulk user delete</h1>
+      <p>An IW admin can delete more than one user, and those people show on the Deleted tab. An organisation owner can delete one user at a time.</p>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-89">Jira TEST-89</a></p>
+    </header>
+    <section class="card">
+      <h2>What changed</h2>
+      <p>On the IW admin user list, Delete Selected uses the same form as deleting one user. A reason is required, and the people are erased. They appear on the Deleted tab, not the Archived tab.</p>
+      <p>On the organisation user list, Delete Selected is gone. The row menu can still delete one user, and that form still asks for a reason.</p>
+    </section>
+    <section class="card">
+      <h2>Checks</h2>
+      <label class="check"><input type="checkbox" data-id="admin-reason" /> As an IW admin, select two users and choose Delete Selected. The form lists both people and will not confirm until a reason is entered and the warning is ticked.</label>
+      <label class="check"><input type="checkbox" data-id="admin-deleted" /> After confirming, both users are gone from Active and appear on the Deleted tab. They do not appear only as archived.</label>
+      <label class="check"><input type="checkbox" data-id="org-no-bulk" /> As an organisation owner, select two users and open Actions. Delete Selected is not in the menu. Archive selected is still there.</label>
+      <label class="check"><input type="checkbox" data-id="org-one" /> From one user’s row menu, Delete still opens the reason form and deletes only that user.</label>
+    </section>
+  </div>
+  <script>
+    const key = 'testing-test-89';
+    const boxes = document.querySelectorAll('input[type="checkbox"][data-id]');
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    boxes.forEach((box) => {
+      box.checked = Boolean(saved[box.dataset.id]);
+      box.addEventListener('change', () => {
+        const next = JSON.parse(localStorage.getItem(key) || '{}');
+        next[box.dataset.id] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+  </script>
+</body>
+</html>
