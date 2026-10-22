@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEST-12 — Edit an event that is in progress</title>
+  <style>
+    :root { --bg: #f6f7f4; --card: #fff; --ink: #1a1f1c; --line: #d9e0da; --accent: #1d4e89; --shadow: 0 10px 30px rgba(26, 31, 28, 0.06); --font: "Segoe UI", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); color: var(--ink); background: radial-gradient(circle at top left, #eef5ff 0, transparent 28%), var(--bg); line-height: 1.5; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    header.hero { background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%); color: #fff; border-radius: 22px; padding: 28px; box-shadow: var(--shadow); margin-bottom: 22px; }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
+    header.hero p { margin: 0; opacity: 0.92; }
+    header.hero a { color: #fff; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    label.check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
+    label.check:first-of-type { border-top: 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TEST-12 — Edit an event that is in progress</h1>
+      <p>An event can still be edited, and a seat can still be changed, after it has started. It locks once it has finished.</p>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-12">Jira TEST-12</a></p>
+    </header>
+    <section class="card">
+      <h2>What changed</h2>
+      <p>The event edit page and the event list no longer lock an event just because the start time has passed. Edit stays available while the event is in progress. It locks when the event status is completed, or when the end time has passed. A booking can be removed until then, so a seat can be given to someone else on the day. Trainers still cannot be changed after the event or a session has started.</p>
+    </section>
+    <section class="card">
+      <h2>Checks</h2>
+      <label class="check"><input type="checkbox" data-id="in-progress" /> Open an event whose start time has passed and whose end time has not. Edit Event is available, and the edit page opens.</label>
+      <label class="check"><input type="checkbox" data-id="seat" /> On that event, remove a confirmed booking and add another learner. Both succeed.</label>
+      <label class="check"><input type="checkbox" data-id="finished" /> Open an event that is completed, or whose end time has passed. Edit is not offered, and a booking cannot be removed.</label>
+      <label class="check"><input type="checkbox" data-id="trainers" /> On an event that has started, trainers still cannot be added or removed.</label>
+    </section>
+  </div>
+  <script>
+    const key = 'testing-test-12';
+    const boxes = document.querySelectorAll('input[type="checkbox"][data-id]');
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    boxes.forEach((box) => {
+      box.checked = Boolean(saved[box.dataset.id]);
+      box.addEventListener('change', () => {
+        const next = JSON.parse(localStorage.getItem(key) || '{}');
+        next[box.dataset.id] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+  </script>
+</body>
+</html>

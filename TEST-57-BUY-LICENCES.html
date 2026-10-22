@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEST-57 — Buy licences for one product</title>
+  <style>
+    :root { --bg: #f6f7f4; --card: #fff; --ink: #1a1f1c; --line: #d9e0da; --accent: #1d4e89; --shadow: 0 10px 30px rgba(26, 31, 28, 0.06); --font: "Segoe UI", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); color: var(--ink); background: radial-gradient(circle at top left, #eef5ff 0, transparent 28%), var(--bg); line-height: 1.5; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    header.hero { background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%); color: #fff; border-radius: 22px; padding: 28px; box-shadow: var(--shadow); margin-bottom: 22px; }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
+    header.hero p { margin: 0; opacity: 0.92; }
+    header.hero a { color: #fff; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    label.check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
+    label.check:first-of-type { border-top: 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TEST-57 — Buy licences for one product</h1>
+      <p>Buying from a licence card offers only that product. The general Buy menu still offers every product.</p>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-57">Jira TEST-57</a></p>
+    </header>
+    <section class="card">
+      <h2>What changed</h2>
+      <p>On a licence card, <strong>Buy licences</strong> opens a new order for that product only. Other courses, and virtual classroom or in-person products, are not in the list, and another product cannot be added. After that order, the button returns to Licences.</p>
+      <p><code>/buy/licences</code> lists eLearning products only. Buy from the main Buy menu still lists every product and returns to Orders and invoices.</p>
+    </section>
+    <section class="card">
+      <h2>Checks</h2>
+      <label class="check"><input type="checkbox" data-id="card" /> On Licences, open a product card and choose Buy licences. The order lists that product only.</label>
+      <label class="check"><input type="checkbox" data-id="no-other" /> The product list does not include another eLearning course, a virtual classroom product, or an in-person product. Add Product is not available.</label>
+      <label class="check"><input type="checkbox" data-id="return" /> Finish the order. The confirmation offers Back to licences, and that opens the licences page.</label>
+      <label class="check"><input type="checkbox" data-id="menu" /> Open Buy licences from the menu. The list is eLearning products only.</label>
+      <label class="check"><input type="checkbox" data-id="generic" /> Start an order from the main Buy menu. Every product is still available, and the confirmation still goes to Orders and invoices.</label>
+    </section>
+  </div>
+  <script>
+    const key = 'testing-test-57';
+    const boxes = document.querySelectorAll('input[type="checkbox"][data-id]');
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    boxes.forEach((box) => {
+      box.checked = Boolean(saved[box.dataset.id]);
+      box.addEventListener('change', () => {
+        const next = JSON.parse(localStorage.getItem(key) || '{}');
+        next[box.dataset.id] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+  </script>
+</body>
+</html>
