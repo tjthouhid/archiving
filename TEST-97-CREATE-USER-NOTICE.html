@@ -30,6 +30,8 @@
     <section class="card">
       <h2>What changed</h2>
       <p>On <code>/users/add</code>, a successful create shows a notice at the top right: “User created successfully. They will receive a sign-up link via email.” The form still returns to blank. Saving an edit of an existing user is unchanged.</p>
+      <p>Creating a user in the IW admin does the same. After save, the list opens and the same notice stays at the top right.</p>
+      <p>On <code>/admin/users/list</code>, each user’s 3-dot menu includes Archive on the active and inactive lists. The archived list still uses Unarchive.</p>
     </section>
     <section class="card">
       <h2>Checks</h2>
@@ -37,6 +39,8 @@
       <label class="check"><input type="checkbox" data-id="toast" /> A confirmation appears at the top right. It says the user was created and will receive a sign-up link. There is no wide green bar on the form.</label>
       <label class="check"><input type="checkbox" data-id="blank" /> The form is blank again, so another user can be created without reloading the page.</label>
       <label class="check"><input type="checkbox" data-id="archive" /> Archive a user or a product. That confirmation is still the top-right notice, not a green bar.</label>
+      <label class="check"><input type="checkbox" data-id="admin-create" /> In the IW admin, create a user. The user list opens and the same top-right confirmation is visible.</label>
+      <label class="check"><input type="checkbox" data-id="admin-row-archive" /> On the admin user list, open one user’s 3-dot menu. Archive is there. Using it archives that user for their organisation.</label>
     </section>
   </div>
   <script>
