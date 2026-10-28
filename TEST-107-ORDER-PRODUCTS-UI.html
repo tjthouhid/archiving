@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEST-107 — Order products actions</title>
+  <style>
+    :root { --bg: #f6f7f4; --card: #fff; --ink: #1a1f1c; --line: #d9e0da; --accent: #1d4e89; --shadow: 0 10px 30px rgba(26, 31, 28, 0.06); --font: "Segoe UI", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); color: var(--ink); background: radial-gradient(circle at top left, #eef5ff 0, transparent 28%), var(--bg); line-height: 1.5; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    header.hero { background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%); color: #fff; border-radius: 22px; padding: 28px; box-shadow: var(--shadow); margin-bottom: 22px; }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
+    header.hero p { margin: 0; opacity: 0.92; }
+    header.hero a { color: #fff; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    label.check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
+    label.check:first-of-type { border-top: 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TEST-107 — Order products actions</h1>
+      <p>The order products step no longer puts a large red Remove button under the line, or a blue Add product button between the line and Next.</p>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-107">Jira TEST-107</a></p>
+    </header>
+    <section class="card">
+      <h2>What changed</h2>
+      <p>On each product line, <strong>Remove</strong> is a red link beside the title, for example next to Product #1. <strong>+ Add product?</strong> sits on the same row as <strong>Next</strong>, in the same orange as Next. Back stays on the left.</p>
+      <p>An order opened from a licence card still cannot add a second product. Invoice groups keep their own add and remove controls.</p>
+      <p>Organisation: <code>/billing/orders-invoices/new</code>. IW admin: <code>/admin/orders/add</code>, on the Order Products step.</p>
+    </section>
+    <section class="card">
+      <h2>Checks</h2>
+      <label class="check"><input type="checkbox" data-id="remove-link" /> Start an organisation order. Remove is a red link next to Product #1. There is no large red Remove button under the fields.</label>
+      <label class="check"><input type="checkbox" data-id="add-next" /> + Add product? is orange and sits immediately left of Next. There is no blue Add product button under the product card.</label>
+      <label class="check"><input type="checkbox" data-id="add-works" /> + Add product? adds Product #2. Each line has its own Remove link, and removing a line leaves the others.</label>
+      <label class="check"><input type="checkbox" data-id="back" /> Back stays on the left and still leaves the step. Next still continues the order.</label>
+      <label class="check"><input type="checkbox" data-id="single" /> Open an order from a licence card (<code>?product=</code>). Add product is not offered, and Remove is still the red link.</label>
+      <label class="check"><input type="checkbox" data-id="admin" /> As an IW admin, open a new order and go to Order Products. The same Remove link and + Add product? placement is used.</label>
+      <label class="check"><input type="checkbox" data-id="invoices" /> On the admin invoice groups step, add and remove still use their previous buttons.</label>
+    </section>
+  </div>
+  <script>
+    const key = 'testing-test-107';
+    const boxes = document.querySelectorAll('input[type="checkbox"][data-id]');
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    boxes.forEach((box) => {
+      box.checked = Boolean(saved[box.dataset.id]);
+      box.addEventListener('change', () => {
+        const next = JSON.parse(localStorage.getItem(key) || '{}');
+        next[box.dataset.id] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+  </script>
+</body>
+</html>

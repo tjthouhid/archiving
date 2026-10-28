@@ -24,21 +24,22 @@
   <div class="wrap">
     <header class="hero">
       <h1>TEST-57 — Buy licences for one product</h1>
-      <p>Buying from a licence card offers only that product. The general Buy menu still offers every product.</p>
+      <p>Buying from a licence card shows that product as fixed text, with no product list. Buy licences in the menu lists eLearning courses only.</p>
       <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-57">Jira TEST-57</a></p>
     </header>
     <section class="card">
       <h2>What changed</h2>
-      <p>On a licence card, <strong>Buy licences</strong> opens a new order for that product only. Other courses, and virtual classroom or in-person products, are not in the list, and another product cannot be added. After that order, the button returns to Licences.</p>
-      <p><code>/buy/licences</code> lists eLearning products only. Buy from the main Buy menu still lists every product and returns to Orders and invoices.</p>
+      <p>On a licence card, <strong>Buy</strong> opens a new order for that product only. The product name is shown as text. There is no dropdown, and another product cannot be added. After that order, the button returns to Licences.</p>
+      <p><strong>Buy licences</strong> in the left menu lists eLearning courses only. Virtual classroom and in-person products are not in that list. <strong>Buy courses</strong> still lists those other course formats, and a generic order still returns to Orders and invoices.</p>
     </section>
     <section class="card">
       <h2>Checks</h2>
-      <label class="check"><input type="checkbox" data-id="card" /> On Licences, open a product card and choose Buy licences. The order lists that product only.</label>
-      <label class="check"><input type="checkbox" data-id="no-other" /> The product list does not include another eLearning course, a virtual classroom product, or an in-person product. Add Product is not available.</label>
+      <label class="check"><input type="checkbox" data-id="card" /> On Licences, open a product card and choose Buy. The product name is fixed text. There is no product dropdown.</label>
+      <label class="check"><input type="checkbox" data-id="no-other" /> Add product is not available, so a second course, a virtual classroom product, or an in-person product cannot be added.</label>
       <label class="check"><input type="checkbox" data-id="return" /> Finish the order. The confirmation offers Back to licences, and that opens the licences page.</label>
-      <label class="check"><input type="checkbox" data-id="menu" /> Open Buy licences from the menu. The list is eLearning products only.</label>
-      <label class="check"><input type="checkbox" data-id="generic" /> Start an order from the main Buy menu. Every product is still available, and the confirmation still goes to Orders and invoices.</label>
+      <label class="check"><input type="checkbox" data-id="menu" /> Open Buy licences from the left menu. The dropdown is eLearning courses only.</label>
+      <label class="check"><input type="checkbox" data-id="courses" /> Open Buy courses. Virtual classroom and in-person courses are still in the dropdown.</label>
+      <label class="check"><input type="checkbox" data-id="generic" /> Start an order from Orders and invoices, without a product on the link. The full product list is still available, and the confirmation still goes to Orders and invoices.</label>
     </section>
   </div>
   <script>

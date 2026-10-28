@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEST-102 — Inactive and archived learners</title>
+  <style>
+    :root { --bg: #f6f7f4; --card: #fff; --ink: #1a1f1c; --line: #d9e0da; --shadow: 0 10px 30px rgba(26, 31, 28, 0.06); --font: "Segoe UI", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); color: var(--ink); background: radial-gradient(circle at top left, #eef5ff 0, transparent 28%), var(--bg); line-height: 1.5; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    header.hero { background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%); color: #fff; border-radius: 22px; padding: 28px; box-shadow: var(--shadow); margin-bottom: 22px; }
+    header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
+    header.hero p { margin: 0; opacity: 0.92; }
+    header.hero a { color: #fff; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    label.check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
+    label.check:first-of-type { border-top: 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>TEST-102 — Inactive and archived learners</h1>
+      <p>Setting a learner inactive or archived does not email them. The next time they sign in with the organisation email, they are told what happened, invited to keep a personal learner record, and can ask the organisation owner to reactivate them. Live organisation courses stay closed.</p>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-102">Jira TEST-102</a></p>
+    </header>
+    <section class="card">
+      <h2>What changed</h2>
+      <p>An organisation owner can set a learner inactive or archive them without an email going to that learner.</p>
+      <p>The next sign-in with that organisation email still opens the learner account. A dialog says the organisation owner set the account as inactive or archived. If they have no personal email, it links them to create a personal learner record. Request re-activation emails the organisation owner once. A second press does not send another email.</p>
+      <p>Live courses on that organisation’s licence show Access denied and cannot be opened. A completed course from that organisation stays on the learner record. An organisation email that was switched off without making the person inactive or archived still cannot sign in.</p>
+    </section>
+    <section class="card">
+      <h2>Checks</h2>
+      <label class="check"><input type="checkbox" data-id="silent" /> Set one learner inactive and archive another. Neither person receives an email about it.</label>
+      <label class="check"><input type="checkbox" data-id="inactive" /> Sign in with the inactive organisation email. The dialog says the account has been set as inactive, and offers a personal learner record when they do not have one.</label>
+      <label class="check"><input type="checkbox" data-id="archived" /> Sign in with an archived organisation email. The dialog says the account has been archived. If they already have a personal email, it tells them to use that next time.</label>
+      <label class="check"><input type="checkbox" data-id="reactivate" /> Press Request re-activation. The organisation owner receives one email. Pressing it again does not send a second email.</label>
+      <label class="check"><input type="checkbox" data-id="courses" /> A course still being studied on that organisation’s licence says Access denied and does not open. A completed course from that organisation is still listed.</label>
+      <label class="check"><input type="checkbox" data-id="blocked" /> An organisation email that was switched off, while the person is still an active member, still cannot sign in.</label>
+    </section>
+  </div>
+  <script>
+    const key = 'testing-test-102';
+    const boxes = document.querySelectorAll('input[type="checkbox"][data-id]');
+    const saved = JSON.parse(localStorage.getItem(key) || '{}');
+    boxes.forEach((box) => {
+      box.checked = Boolean(saved[box.dataset.id]);
+      box.addEventListener('change', () => {
+        const next = JSON.parse(localStorage.getItem(key) || '{}');
+        next[box.dataset.id] = box.checked;
+        localStorage.setItem(key, JSON.stringify(next));
+      });
+    });
+  </script>
+</body>
+</html>

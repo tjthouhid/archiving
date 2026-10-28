@@ -29,13 +29,14 @@
     </header>
     <section class="card">
       <h2>What changed</h2>
-      <p>On the IW admin user list, Delete Selected uses the same form as deleting one user. A reason is required, and the people are erased. They appear on the Deleted tab, not the Archived tab.</p>
+      <p>On the IW admin user list, Delete Selected uses the same form as deleting one user. A reason is required, and the people are erased. They appear on the Deleted tab, not the Archived tab. That tab opens with the most recently deleted person first, and the Date deleted column can be sorted.</p>
       <p>On the organisation user list, Delete Selected is gone. The row menu can still delete one user, and that form still asks for a reason.</p>
     </section>
     <section class="card">
       <h2>Checks</h2>
       <label class="check"><input type="checkbox" data-id="admin-reason" /> As an IW admin, select two users and choose Delete Selected. The form lists both people and will not confirm until a reason is entered and the warning is ticked.</label>
       <label class="check"><input type="checkbox" data-id="admin-deleted" /> After confirming, both users are gone from Active and appear on the Deleted tab. They do not appear only as archived.</label>
+      <label class="check"><input type="checkbox" data-id="deleted-order" /> On the Deleted tab, the newest deletion is first. Click Date deleted and the order reverses.</label>
       <label class="check"><input type="checkbox" data-id="org-no-bulk" /> As an organisation owner, select two users and open Actions. Delete Selected is not in the menu. Archive selected is still there.</label>
       <label class="check"><input type="checkbox" data-id="org-one" /> From one user’s row menu, Delete still opens the reason form and deletes only that user.</label>
     </section>
