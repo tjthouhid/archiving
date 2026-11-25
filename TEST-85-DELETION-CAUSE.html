@@ -3,40 +3,282 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TEST-85 — Deletion cause</title>
+  <title>TEST-85 — Deletion cause and the 6-year records policy</title>
   <style>
-    :root { --bg: #f6f7f4; --card: #fff; --ink: #1a1f1c; --line: #d9e0da; --shadow: 0 10px 30px rgba(26, 31, 28, 0.06); --font: "Segoe UI", system-ui, sans-serif; }
+    :root { --bg: #f6f7f4; --card: #fff; --ink: #1a1f1c; --muted: #5b665f; --line: #d9e0da; --green: #1f7a4d; --green-bg: #e6f4ec; --amber: #9a6200; --amber-bg: #fff4dc; --red: #a8322d; --red-bg: #fbe9e7; --blue: #1d4e89; --blue-bg: #e8f0fb; --shadow: 0 10px 30px rgba(26, 31, 28, 0.06); --font: "Segoe UI", system-ui, sans-serif; }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: var(--font); color: var(--ink); background: radial-gradient(circle at top left, #eef5ff 0, transparent 28%), var(--bg); line-height: 1.5; }
-    .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+    .wrap { max-width: 940px; margin: 0 auto; padding: 28px 18px 64px; }
     header.hero { background: linear-gradient(135deg, #173a2f 0%, #1d4e89 100%); color: #fff; border-radius: 22px; padding: 28px; box-shadow: var(--shadow); margin-bottom: 22px; }
     header.hero h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2rem); }
     header.hero p { margin: 0; opacity: 0.92; }
     header.hero a { color: #fff; }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .pill { font-size: 0.82rem; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.16); }
     .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px; }
-    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    h2 { margin: 0 0 10px; font-size: 1.15rem; }
+    h3 { margin: 16px 0 6px; font-size: 1rem; }
+    p { margin: 0 0 10px; }
+    .muted { color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+    th, td { text-align: left; padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+    th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-top: 0; }
+    .tag { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+    .tag.done { background: var(--green-bg); color: var(--green); }
+    .tag.test { background: var(--amber-bg); color: var(--amber); }
+    .tag.locked { background: var(--red-bg); color: var(--red); }
+    .tag.info { background: var(--blue-bg); color: var(--blue); }
+    .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .box { border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+    .box.test { border-color: #f0d59a; background: #fffbf1; }
+    .box.live { border-color: #efc2bd; background: #fff7f6; }
+    .box ul { margin: 6px 0 0; padding-left: 18px; }
+    pre { background: #111a16; color: #e7f2ea; border-radius: 12px; padding: 12px 14px; overflow-x: auto; font-size: 0.85rem; margin: 6px 0 12px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; overflow-wrap: anywhere; }
+    pre code { overflow-wrap: normal; }
+    p code, td code, li code { background: #eef1ee; padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+    svg { width: 100%; height: auto; display: block; }
+    .src { display: grid; grid-template-columns: 210px 1fr; gap: 6px 12px; align-items: center; font-size: 0.92rem; }
+    .bar { height: 14px; border-radius: 7px; background: linear-gradient(90deg, #1d4e89, #3b7bd0); }
+    ol.steps { margin: 0; padding-left: 20px; }
+    ol.steps li { margin-bottom: 12px; }
     label.check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
     label.check:first-of-type { border-top: 0; }
-    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header class="hero">
-      <h1>TEST-85 — Deletion cause</h1>
-      <p>A deletion from the form is labelled User request. The records-policy deletion date is not calculated.</p>
-      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-85">Jira TEST-85</a></p>
+      <h1>TEST-85 — Deletion cause and the 6-year records policy</h1>
+      <p>Every deletion has a cause. People with no contact for 6 years are deleted once a year, on 31 December, after their organisation's owners are warned. On staging this runs in test mode: every deletion can be undone, and nothing is written to the legacy database.</p>
+      <div class="pills">
+        <span class="pill">Part 1: User request label (done)</span>
+        <span class="pill">Part 2: 6-year policy (built, test mode)</span>
+        <span class="pill">Live deletion: locked</span>
+      </div>
+      <p style="margin-top: 12px;"><a href="index.html">All guides</a> · <a href="https://inties.atlassian.net/browse/TEST-85">Jira TEST-85</a> · Plan: <code style="background:none;color:#fff">docs/TEST-85_RECORDS_POLICY_PLAN.md</code></p>
     </header>
+
     <section class="card">
-      <h2>What changed</h2>
-      <p>When an organisation owner or an IW admin deletes a user, the record stores the cause User request as well as the written reason. The Deleted tab shows a Deletion cause column. Reports can add a Deletion cause column.</p>
-      <p>The other cause, Information and Records Management policy, is reserved. The ticket does not say what date the six years is counted from, so no automatic deletion and no policy date are applied.</p>
+      <h2>1. The two deletion causes</h2>
+      <table>
+        <tr><th>Cause</th><th>When it is set</th><th>Can it be unarchived?</th></tr>
+        <tr><td><strong>User request</strong> <span class="tag done">Done</span></td><td>An Organisation owner or IW admin deletes a user with the deletion form and a reason of up to 200 characters.</td><td>An <em>archived</em> person can be unarchived by IW until their policy deletion date. A <em>deleted</em> person cannot.</td></tr>
+        <tr><td><strong>Information and Records Management policy</strong> <span class="tag test">New</span></td><td>Set automatically by the yearly cleanup, 6 years after the person's last contact.</td><td>Never. Unarchive is refused with a message that names the policy and the date.</td></tr>
+      </table>
     </section>
+
     <section class="card">
-      <h2>Checks</h2>
-      <label class="check"><input type="checkbox" data-id="cause" /> Delete one user from the admin list, with a reason. On the Deleted tab, Deletion cause reads User request and Deletion reason is the text you entered.</label>
-      <label class="check"><input type="checkbox" data-id="report" /> On a users report that includes deleted people, add the Deletion cause column. The row says User request.</label>
-      <label class="check"><input type="checkbox" data-id="no-date" /> There is no records-policy deletion date on the record.</label>
+      <h2>2. Decisions behind this build</h2>
+      <table>
+        <tr><th>Question</th><th>Decision</th></tr>
+        <tr><td>6 years from what?</td><td>From the person's <strong>last contact</strong>: the latest certificate, IOSH or NEBOSH upload, course finish, course start, registration, <strong>login or activity</strong>, or the account itself if nothing else exists.</td></tr>
+        <tr><td>Daily or yearly?</td><td><strong>Yearly.</strong> The cleanup runs on 31 December. A person is due on <strong>31 December of (year of last contact + 6)</strong>. That keeps data at least 6 full years and up to almost 7.</td></tr>
+        <tr><td>Which data?</td><td><strong>People data only</strong>: name, email, phone, custom fields, and IOSH or NEBOSH certificate files. Organisations, orders, invoices, licences and products are not touched.</td></tr>
+        <tr><td>Warning</td><td>Owners are warned on <strong>1 October</strong> (about 90 days ahead) and reminded on <strong>1 December</strong>. IW admins get a summary.</td></tr>
+        <tr><td>First live run</td><td>31 December 2026, with 6 years, only after IW reviews a dry run and approves live mode.</td></tr>
+        <tr><td>Dashboards</td><td>The User status toggle stays in Reports. Performance dashboards are a separate ticket.</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>3. One person's timeline</h2>
+      <p class="muted">Example: last contact 2 January 2019. Policy deletion date 31 December 2025.</p>
+      <svg viewBox="0 0 900 200" role="img" aria-label="Timeline from last contact in 2019 to deletion on 31 December 2025">
+        <line x1="40" y1="100" x2="870" y2="100" stroke="#c9d3cc" stroke-width="4" stroke-linecap="round"/>
+        <rect x="40" y="92" width="805" height="16" rx="8" fill="#e6f4ec"/>
+        <text x="420" y="86" text-anchor="middle" font-size="13" fill="#1f7a4d" font-weight="600">Archived records can still be unarchived by IW</text>
+        <g stroke="#9aa79f">
+          <line x1="40" y1="110" x2="40" y2="118"/><line x1="155" y1="110" x2="155" y2="118"/><line x1="270" y1="110" x2="270" y2="118"/><line x1="385" y1="110" x2="385" y2="118"/>
+          <line x1="500" y1="110" x2="500" y2="118"/><line x1="615" y1="110" x2="615" y2="118"/><line x1="730" y1="110" x2="730" y2="118"/><line x1="845" y1="110" x2="845" y2="118"/>
+        </g>
+        <g font-size="12" fill="#5b665f" text-anchor="middle">
+          <text x="40" y="133">2019</text><text x="155" y="133">2020</text><text x="270" y="133">2021</text><text x="385" y="133">2022</text>
+          <text x="500" y="133">2023</text><text x="615" y="133">2024</text><text x="730" y="133">2025</text><text x="845" y="133">2026</text>
+        </g>
+        <circle cx="41" cy="100" r="10" fill="#1d4e89"/>
+        <text x="44" y="162" text-anchor="start" font-size="13" font-weight="600" fill="#1d4e89">Last contact</text>
+        <text x="44" y="178" text-anchor="start" font-size="12" fill="#5b665f">2 Jan 2019</text>
+        <line x1="816" y1="30" x2="816" y2="92" stroke="#9a6200" stroke-dasharray="3 3"/>
+        <circle cx="816" cy="100" r="6" fill="#9a6200"/>
+        <text x="810" y="26" text-anchor="end" font-size="12" fill="#9a6200" font-weight="600">1 Oct 2025: owners warned</text>
+        <line x1="835" y1="50" x2="835" y2="92" stroke="#9a6200" stroke-dasharray="3 3"/>
+        <circle cx="835" cy="100" r="6" fill="#9a6200"/>
+        <text x="829" y="54" text-anchor="end" font-size="12" fill="#9a6200" font-weight="600">1 Dec 2025: reminder</text>
+        <circle cx="845" cy="100" r="10" fill="#a8322d"/>
+        <text x="870" y="162" text-anchor="end" font-size="13" font-weight="600" fill="#a8322d">Deleted by policy · 31 Dec 2025</text>
+        <text x="870" y="178" text-anchor="end" font-size="12" fill="#5b665f">No unarchive after this date</text>
+      </svg>
+      <table style="margin-top:8px">
+        <tr><th>Last contact</th><th>Policy deletion date</th><th>Kept for</th></tr>
+        <tr><td>2 Jan 2019</td><td>31 Dec 2025</td><td>almost 7 years</td></tr>
+        <tr><td>31 Dec 2019</td><td>31 Dec 2025</td><td>exactly 6 years</td></tr>
+        <tr><td>29 Feb 2020</td><td>31 Dec 2026</td><td>almost 7 years</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>4. How "last contact" is worked out</h2>
+      <p>For each person, across <strong>all</strong> their organisations, the system takes the most recent of these dates. Archived rows count too, so archiving never brings the date forward.</p>
+      <div class="src">
+        <span>IOSH / NEBOSH certificate upload</span><div class="bar" style="width:100%"></div>
+        <span>Certificate issue or pass date</span><div class="bar" style="width:92%"></div>
+        <span>Last login or activity</span><div class="bar" style="width:84%"></div>
+        <span>Course finished</span><div class="bar" style="width:76%"></div>
+        <span>Course started / registration</span><div class="bar" style="width:62%"></div>
+        <span>Account created (fallback)</span><div class="bar" style="width:40%; background:#9aa79f"></div>
+      </div>
+      <p class="muted" style="margin-top:10px">The bars show how recent each date usually is. Whichever is latest wins. The results are stored on the person as <code>users.last_contact_at</code> and <code>users.records_policy_due_on</code>, and refreshed every night at 02:00.</p>
+    </section>
+
+    <section class="card">
+      <h2>5. What the yearly cleanup does</h2>
+      <svg viewBox="0 0 900 330" role="img" aria-label="Flow of the yearly records policy cleanup">
+        <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5b665f"/></marker></defs>
+        <g font-size="13" text-anchor="middle">
+          <rect x="20" y="20" width="190" height="64" rx="12" fill="#e8f0fb" stroke="#1d4e89"/>
+          <text x="115" y="46" font-weight="600" fill="#1d4e89">Every night 02:00</text>
+          <text x="115" y="66" fill="#1a1f1c">Refresh dates</text>
+          <rect x="240" y="20" width="190" height="64" rx="12" fill="#fff4dc" stroke="#9a6200"/>
+          <text x="335" y="46" font-weight="600" fill="#9a6200">1 Oct · 1 Dec</text>
+          <text x="335" y="66" fill="#1a1f1c">Warn owners + IW</text>
+          <rect x="460" y="20" width="190" height="64" rx="12" fill="#fbe9e7" stroke="#a8322d"/>
+          <text x="555" y="46" font-weight="600" fill="#a8322d">31 Dec 22:00</text>
+          <text x="555" y="66" fill="#1a1f1c">Run cleanup</text>
+          <rect x="680" y="20" width="200" height="64" rx="12" fill="#e6f4ec" stroke="#1f7a4d"/>
+          <text x="780" y="46" font-weight="600" fill="#1f7a4d">Any time (test mode)</text>
+          <text x="780" y="66" fill="#1a1f1c">Revert a run</text>
+        </g>
+        <line x1="210" y1="52" x2="236" y2="52" stroke="#5b665f" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="430" y1="52" x2="456" y2="52" stroke="#5b665f" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="650" y1="52" x2="676" y2="52" stroke="#5b665f" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="555" y1="84" x2="555" y2="116" stroke="#5b665f" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="150" y="120" width="740" height="196" rx="14" fill="#fffbf1" stroke="#f0d59a"/>
+        <text x="170" y="146" font-size="13" font-weight="600" fill="#9a6200">For each person due (not on hold, not already deleted) — inside one database transaction</text>
+        <g font-size="13">
+          <circle cx="182" cy="176" r="12" fill="#9a6200"/><text x="182" y="181" text-anchor="middle" fill="#fff" font-weight="700">1</text>
+          <text x="204" y="181" fill="#1a1f1c">Turn on the <tspan font-weight="600">legacy write guard</tspan>: any INSERT / UPDATE / DELETE to a legacy database is blocked.</text>
+          <circle cx="182" cy="212" r="12" fill="#9a6200"/><text x="182" y="217" text-anchor="middle" fill="#fff" font-weight="700">2</text>
+          <text x="204" y="217" fill="#1a1f1c">Save an <tspan font-weight="600">encrypted copy</tspan> of the person's rows in <tspan font-family="monospace">records_policy_deletions</tspan>.</text>
+          <circle cx="182" cy="248" r="12" fill="#9a6200"/><text x="182" y="253" text-anchor="middle" fill="#fff" font-weight="700">3</text>
+          <text x="204" y="253" fill="#1a1f1c">Hide IOSH / NEBOSH uploads (<tspan font-family="monospace">purged_at</tspan>). The PDF stays in storage.</text>
+          <circle cx="182" cy="284" r="12" fill="#9a6200"/><text x="182" y="289" text-anchor="middle" fill="#fff" font-weight="700">4</text>
+          <text x="204" y="289" fill="#1a1f1c">Anonymise with the same EraseUser action as the form, cause = <tspan font-weight="600">Information and Records Management policy</tspan>.</text>
+        </g>
+      </svg>
+      <p class="muted">Step 4 is the same anonymisation as a manual deletion: name becomes "Anonymized Learner", email becomes <code>erased-…@anonymized.invalid</code>, phone and password are cleared, custom fields are removed, organisation memberships end, and the record goes to the Deleted tab. Registrations and own certificates stay as history, under the anonymised name.</p>
+    </section>
+
+    <section class="card">
+      <h2>6. Safety: test mode now, live mode later</h2>
+      <div class="grid2">
+        <div class="box test">
+          <span class="tag test">Test mode — on staging now</span>
+          <ul>
+            <li>Every deletion can be undone with one command.</li>
+            <li>An encrypted copy of the person is kept until it is reverted.</li>
+            <li>IOSH / NEBOSH PDFs are <strong>not</strong> deleted from storage, only hidden.</li>
+            <li>Writes to <code>legacy</code>, <code>legacy_lms</code>, <code>legacy_lrs</code> and <code>legacy_admin</code> are blocked. Reads still work.</li>
+            <li>Owner emails are off unless <code>RECORDS_POLICY_NOTIFY_OWNERS=true</code>. Only IW admins get the summary.</li>
+            <li>Nothing runs unless <code>RECORDS_POLICY_ENABLED=true</code>.</li>
+          </ul>
+        </div>
+        <div class="box live">
+          <span class="tag locked">Live mode — locked</span>
+          <ul>
+            <li>Setting <code>RECORDS_POLICY_MODE=live</code> makes the run stop with "live mode is not approved yet".</li>
+            <li>The approval switch is in <code>config/records_policy.php</code> (<code>live_approved =&gt; false</code>). It is not an environment variable, so a server setting can't turn it on.</li>
+            <li>When IW approves, a follow-up change will delete PDFs from S3, keep no copy of the person, and turn on owner emails.</li>
+          </ul>
+        </div>
+      </div>
+      <h3>Where the data lives</h3>
+      <p>All the rows this cleanup changes (<code>users</code>, <code>user_emails</code>, <code>attribute_values</code>, <code>tenant_users</code>, <code>employment_periods</code>, <code>certificate_uploads</code>) are in the main Postgres database. The code checked does not write to legacy. The guard is a second safety net in case something does.</p>
+    </section>
+
+    <section class="card">
+      <h2>7. Where it shows in the app</h2>
+      <table>
+        <tr><th>Place</th><th>What you see</th></tr>
+        <tr><td>Admin → Users → <strong>Archived</strong> tab</td><td>New column <strong>Policy deletion date</strong>. Hover: "Can be unarchived until this date".</td></tr>
+        <tr><td>Admin → Users → <strong>Deleted</strong> tab</td><td><strong>Deletion cause</strong> reads User request or Information and Records Management policy. The deletion reason explains the policy deletion.</td></tr>
+        <tr><td>Admin → Users → Archived → <strong>Unarchive</strong></td><td>For a person deleted by the policy: "Deleted under the Information and Records Management policy on {date}. This record cannot be unarchived."</td></tr>
+        <tr><td><strong>Reports</strong> (every user-related report)</td><td>New columns <strong>Last contact</strong> and <strong>Policy deletion date</strong>.</td></tr>
+        <tr><td><strong>Users report</strong> filters</td><td>New filter <strong>Policy deletion date</strong> (date range). With User status = All, owners can export everyone due before 31 Dec.</td></tr>
+        <tr><td>Email to owners (1 Oct, 1 Dec)</td><td>"{N} people in {organisation} will be deleted on 31 December {year}", with a link to Reports and how to export.</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>8. How to test on staging</h2>
+      <ol class="steps">
+        <li>Deploy, then run migrations. Two new pieces: three columns on <code>users</code> and a new table, <code>records_policy_deletions</code>.
+          <pre>php artisan migrate</pre></li>
+        <li>Set these in the staging <code>.env</code>, then clear the config cache:
+          <pre>RECORDS_POLICY_ENABLED=true
+RECORDS_POLICY_MODE=test
+RECORDS_POLICY_RETENTION_YEARS=6
+RECORDS_POLICY_NOTIFY_OWNERS=false
+
+php artisan config:clear</pre></li>
+        <li>Work out everyone's dates:
+          <pre>php artisan compliance:records-policy-refresh-dates</pre></li>
+        <li>See who <em>would</em> be deleted at the end of this year. Nothing is deleted:
+          <pre>php artisan compliance:records-policy-run --date=2026-12-31 --dry-run</pre></li>
+        <li>See who <em>would</em> be warned. No email is sent:
+          <pre>php artisan compliance:records-policy-notify --date=2026-10-01 --dry-run</pre></li>
+        <li>Delete one or two test people only (pick ids from the dry run). Note the run id it prints:
+          <pre>php artisan compliance:records-policy-run --date=2026-12-31 --user=123 --user=456</pre></li>
+        <li>Check the app: they are on the Deleted tab with the policy cause, and Unarchive is refused.</li>
+        <li>Undo it:
+          <pre>php artisan compliance:records-policy-revert --list
+php artisan compliance:records-policy-revert --run=&lt;run id&gt;</pre></li>
+        <li>Check the people are back exactly as before: name, emails, organisation, custom fields and IOSH certificate.</li>
+      </ol>
+      <p class="muted">Other options: <code>--limit=10</code> on the run stops after 10 people. <code>--all</code> on revert undoes every test deletion. To keep someone out of the cleanup, set <code>users.records_policy_hold = true</code>.</p>
+    </section>
+
+    <section class="card">
+      <h2>9. Checks</h2>
+      <label class="check"><input type="checkbox" data-id="cause" /> Delete a user from the admin list with a reason. On the Deleted tab, Deletion cause reads User request and Deletion reason is your text.</label>
+      <label class="check"><input type="checkbox" data-id="report" /> On a users report with User status = All, add Deletion cause, Last contact and Policy deletion date. The values are filled in.</label>
+      <label class="check"><input type="checkbox" data-id="archived-date" /> On the Archived tab, Policy deletion date shows a 31 December date.</label>
+      <label class="check"><input type="checkbox" data-id="dry-run" /> The dry run lists people and changes nothing. The Deleted tab is unchanged.</label>
+      <label class="check"><input type="checkbox" data-id="policy-delete" /> After a run for one person, their Deletion cause reads Information and Records Management policy.</label>
+      <label class="check"><input type="checkbox" data-id="no-unarchive" /> Unarchiving that person is refused, with the policy message.</label>
+      <label class="check"><input type="checkbox" data-id="iosh-hidden" /> Their IOSH certificate is on the certificates Deleted tab, and the PDF is still in storage.</label>
+      <label class="check"><input type="checkbox" data-id="revert" /> After revert, the person is back as before, including their IOSH certificate.</label>
+      <label class="check"><input type="checkbox" data-id="legacy" /> The legacy database has no changes for those people.</label>
+      <label class="check"><input type="checkbox" data-id="off" /> With <code>RECORDS_POLICY_ENABLED=false</code>, the run deletes nothing. With <code>RECORDS_POLICY_MODE=live</code>, it refuses to start.</label>
+      <label class="check"><input type="checkbox" data-id="notice" /> The notify command emails IW admins a summary, and owners get nothing while owner emails are off.</label>
+    </section>
+
+    <section class="card">
+      <h2>10. What changed in the code</h2>
+      <table>
+        <tr><th>Area</th><th>Files</th></tr>
+        <tr><td>Settings</td><td><code>api/config/records_policy.php</code></td></tr>
+        <tr><td>Database</td><td><code>…_add_records_policy_to_users_table.php</code>, <code>…_create_records_policy_deletions_table.php</code></td></tr>
+        <tr><td>Dates</td><td><code>app/Services/RecordsPolicy/RecordsPolicyDates.php</code></td></tr>
+        <tr><td>Delete and undo</td><td><code>app/Actions/RecordsPolicy/ApplyRecordsPolicy.php</code>, <code>RevertRecordsPolicyDeletion.php</code>, <code>app/Services/RecordsPolicy/PersonSnapshot.php</code>, <code>app/Models/RecordsPolicyDeletion.php</code></td></tr>
+        <tr><td>Legacy safety</td><td><code>app/Support/LegacyWriteGuard.php</code></td></tr>
+        <tr><td>Commands</td><td><code>app/Console/Commands/RecordsPolicy/*</code>, schedule in <code>routes/console.php</code></td></tr>
+        <tr><td>Emails</td><td><code>app/Notifications/RecordsPolicyNoticeNotification.php</code>, <code>RecordsPolicyAdminSummaryNotification.php</code>, <code>app/Services/RecordsPolicy/RecordsPolicyRecipients.php</code></td></tr>
+        <tr><td>Unarchive guard</td><td><code>UnarchiveOrganisationUsers.php</code>, <code>AdminRestoreUser.php</code>, <code>AdminUserArchiveController.php</code>, <code>app/Exceptions/UserDeletedException.php</code></td></tr>
+        <tr><td>Reports and grid</td><td><code>SharedUserColumns.php</code>, <code>UsersDataset.php</code>, <code>UserResource.php</code>, <code>client/…/Admin/UserGrid/Columns.js</code></td></tr>
+        <tr><td>Tests</td><td><code>tests/Feature/Lifecycle/RecordsPolicyTest.php</code> (21 tests)</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>11. Not in this change</h2>
+      <ul>
+        <li><strong>Live mode</strong>: permanent S3 file deletion, no kept copy, owner emails on. This is done after IW approves.</li>
+        <li>The existing IOSH <em>Delete</em> button removes only a local file, but the PDFs are stored on S3. That is fixed together with live mode.</li>
+        <li>Organisation data retention (orders, invoices) needs a separate rule and ticket.</li>
+        <li>A User status toggle on the performance dashboards needs a separate ticket.</li>
+        <li>In reports, archived people's names show as "Anonymised" (TEST-84). Owners can export them only by ID and dates, not by name.</li>
+      </ul>
     </section>
   </div>
   <script>
