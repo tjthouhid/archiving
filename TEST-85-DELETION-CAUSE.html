@@ -200,6 +200,7 @@
       <h2>7. Where it shows in the app</h2>
       <table>
         <tr><th>Place</th><th>What you see</th></tr>
+        <tr><td>Admin → Users → More → <strong>Records policy</strong></td><td>Status, and buttons to refresh dates, preview, run the cleanup now and restore. See section 8.</td></tr>
         <tr><td>Admin → Users → <strong>Archived</strong> tab</td><td>New column <strong>Policy deletion date</strong>. Hover: "Can be unarchived until this date".</td></tr>
         <tr><td>Admin → Users → <strong>Deleted</strong> tab</td><td><strong>Deletion cause</strong> reads User request or Information and Records Management policy. The deletion reason explains the policy deletion.</td></tr>
         <tr><td>Admin → Users → Archived → <strong>Unarchive</strong></td><td>For a person deleted by the policy: "Deleted under the Information and Records Management policy on {date}. This record cannot be unarchived."</td></tr>
@@ -210,32 +211,60 @@
     </section>
 
     <section class="card">
-      <h2>8. How to test on staging</h2>
+      <h2>8. How to test on staging (no waiting)</h2>
+      <p>You don't have to wait for 02:00 or 31 December. Every step has a button on <strong>Admin → Users → More → Records policy</strong> (<code>/admin/users/records-policy</code>). Only IW admins who can delete users see it.</p>
+      <svg viewBox="0 0 900 250" role="img" aria-label="Mock-up of the Records policy admin page with its three steps">
+        <rect x="10" y="10" width="880" height="230" rx="14" fill="#ffffff" stroke="#d9e0da"/>
+        <text x="30" y="40" font-size="15" font-weight="700" fill="#1a1f1c">Information and Records Management policy</text>
+        <rect x="560" y="24" width="40" height="22" rx="11" fill="#1d4e89"/><text x="580" y="39" font-size="11" fill="#fff" text-anchor="middle">On</text>
+        <rect x="608" y="24" width="170" height="22" rx="11" fill="#fff" stroke="#9aa79f"/><text x="693" y="39" font-size="11" fill="#1a1f1c" text-anchor="middle">Test mode: can be restored</text>
+        <g font-size="12">
+          <rect x="30" y="62" width="200" height="50" rx="8" fill="#f6f7f4" stroke="#d9e0da"/><text x="42" y="80" fill="#5b665f">Next cleanup</text><text x="42" y="101" font-weight="700" fill="#1a1f1c">31 Dec 2026</text>
+          <rect x="242" y="62" width="200" height="50" rx="8" fill="#f6f7f4" stroke="#d9e0da"/><text x="254" y="80" fill="#5b665f">Due at next cleanup</text><text x="254" y="101" font-weight="700" fill="#1a1f1c">137</text>
+          <rect x="454" y="62" width="200" height="50" rx="8" fill="#f6f7f4" stroke="#d9e0da"/><text x="466" y="80" fill="#5b665f">People with a policy date</text><text x="466" y="101" font-weight="700" fill="#1a1f1c">8,412</text>
+          <rect x="666" y="62" width="200" height="50" rx="8" fill="#f6f7f4" stroke="#d9e0da"/><text x="678" y="80" fill="#5b665f">Owner emails</text><text x="678" y="101" font-weight="700" fill="#1a1f1c">Off (IW only)</text>
+        </g>
+        <g font-size="12">
+          <text x="30" y="140" font-weight="700" fill="#1a1f1c">1. Refresh policy dates</text>
+          <rect x="30" y="150" width="170" height="32" rx="6" fill="#173a2f"/><text x="115" y="171" fill="#fff" text-anchor="middle">⟳  Refresh dates now</text>
+          <text x="300" y="140" font-weight="700" fill="#1a1f1c">2. Run the cleanup now</text>
+          <rect x="300" y="150" width="120" height="32" rx="6" fill="#fff" stroke="#9aa79f"/><text x="360" y="171" fill="#1a1f1c" text-anchor="middle">31/12/2026</text>
+          <rect x="430" y="150" width="150" height="32" rx="6" fill="#eef1ee" stroke="#9aa79f"/><text x="505" y="171" fill="#1a1f1c" text-anchor="middle">👁  Preview who is due</text>
+          <rect x="590" y="150" width="140" height="32" rx="6" fill="#a8322d"/><text x="660" y="171" fill="#fff" text-anchor="middle">▶  Run cleanup now</text>
+          <text x="750" y="140" font-weight="700" fill="#1a1f1c">3. Restore</text>
+          <rect x="750" y="150" width="120" height="32" rx="6" fill="#fff" stroke="#9aa79f"/><text x="810" y="171" fill="#1a1f1c" text-anchor="middle">↶  Restore run</text>
+        </g>
+        <text x="30" y="215" font-size="12" fill="#5b665f">The preview table lists each due person with a "Delete this person" button. Every run below it has "Restore this run" and a Restore per person.</text>
+      </svg>
+      <h3>One-time setup (developer)</h3>
       <ol class="steps">
-        <li>Deploy, then run migrations. Two new pieces: three columns on <code>users</code> and a new table, <code>records_policy_deletions</code>.
-          <pre>php artisan migrate</pre></li>
-        <li>Set these in the staging <code>.env</code>, then clear the config cache:
+        <li>Deploy, then run the migrations: <pre>php artisan migrate</pre></li>
+        <li>Put these in the <strong>API</strong> <code>.env</code> on staging (<code>api/.env</code>, not the client), then clear the config cache:
           <pre>RECORDS_POLICY_ENABLED=true
 RECORDS_POLICY_MODE=test
 RECORDS_POLICY_RETENTION_YEARS=6
 RECORDS_POLICY_NOTIFY_OWNERS=false
 
 php artisan config:clear</pre></li>
-        <li>Work out everyone's dates:
-          <pre>php artisan compliance:records-policy-refresh-dates</pre></li>
-        <li>See who <em>would</em> be deleted at the end of this year. Nothing is deleted:
-          <pre>php artisan compliance:records-policy-run --date=2026-12-31 --dry-run</pre></li>
-        <li>See who <em>would</em> be warned. No email is sent:
-          <pre>php artisan compliance:records-policy-notify --date=2026-10-01 --dry-run</pre></li>
-        <li>Delete one or two test people only (pick ids from the dry run). Note the run id it prints:
-          <pre>php artisan compliance:records-policy-run --date=2026-12-31 --user=123 --user=456</pre></li>
-        <li>Check the app: they are on the Deleted tab with the policy cause, and Unarchive is refused.</li>
-        <li>Undo it:
-          <pre>php artisan compliance:records-policy-revert --list
-php artisan compliance:records-policy-revert --run=&lt;run id&gt;</pre></li>
-        <li>Check the people are back exactly as before: name, emails, organisation, custom fields and IOSH certificate.</li>
       </ol>
-      <p class="muted">Other options: <code>--limit=10</code> on the run stops after 10 people. <code>--all</code> on revert undoes every test deletion. To keep someone out of the cleanup, set <code>users.records_policy_hold = true</code>.</p>
+      <h3>Tester steps</h3>
+      <ol class="steps">
+        <li>Open <strong>Admin → Users</strong>, open <strong>More</strong>, choose <strong>Records policy</strong>. Status shows <em>On</em> and <em>Test mode: can be restored</em>.</li>
+        <li>Click <strong>Refresh dates now</strong>. A message says how many people were updated. Go back to the <strong>Archived</strong> tab: the Policy deletion date column is filled.</li>
+        <li>Leave the date as 31 December this year (or pick a later year to include more people) and click <strong>Preview who is due</strong>. Nothing is deleted. The table shows each person's last contact and policy deletion date.</li>
+        <li>On one test person, click <strong>Delete this person</strong> and confirm. (<strong>Run cleanup now</strong> deletes up to 50 people due on that date.)</li>
+        <li>Check the app: the person is on the <strong>Deleted</strong> tab with the cause <em>Information and Records Management policy</em>. Unarchiving them is refused, and their IOSH certificate is on the certificates Deleted tab.</li>
+        <li>Back on Records policy, under <strong>3. Restore</strong>, click <strong>Restore</strong> on that person (or <strong>Restore this run</strong>).</li>
+        <li>Check the person is back exactly as before: name, emails, organisation, custom fields and IOSH certificate.</li>
+      </ol>
+      <h3>Same steps from the command line (developer)</h3>
+      <pre>php artisan compliance:records-policy-refresh-dates
+php artisan compliance:records-policy-run --date=2026-12-31 --dry-run
+php artisan compliance:records-policy-run --date=2026-12-31 --user=123
+php artisan compliance:records-policy-revert --list
+php artisan compliance:records-policy-revert --run=&lt;run id&gt;
+php artisan compliance:records-policy-notify --date=2026-10-01 --dry-run</pre>
+      <p class="muted">To keep someone out of the cleanup, set <code>users.records_policy_hold = true</code>. A person can be restored once. After a restore they are still due, so the next run deletes them again.</p>
     </section>
 
     <section class="card">
@@ -243,13 +272,17 @@ php artisan compliance:records-policy-revert --run=&lt;run id&gt;</pre></li>
       <label class="check"><input type="checkbox" data-id="cause" /> Delete a user from the admin list with a reason. On the Deleted tab, Deletion cause reads User request and Deletion reason is your text.</label>
       <label class="check"><input type="checkbox" data-id="report" /> On a users report with User status = All, add Deletion cause, Last contact and Policy deletion date. The values are filled in.</label>
       <label class="check"><input type="checkbox" data-id="archived-date" /> On the Archived tab, Policy deletion date shows a 31 December date.</label>
-      <label class="check"><input type="checkbox" data-id="dry-run" /> The dry run lists people and changes nothing. The Deleted tab is unchanged.</label>
+      <label class="check"><input type="checkbox" data-id="page" /> Admin → Users → More → Records policy opens the page. An admin without permission to delete users does not see it.</label>
+      <label class="check"><input type="checkbox" data-id="refresh-button" /> Refresh dates now shows how many people were updated, and Due at next cleanup changes to match.</label>
+      <label class="check"><input type="checkbox" data-id="dry-run" /> Preview who is due lists people and changes nothing. The Deleted tab is unchanged.</label>
+      <label class="check"><input type="checkbox" data-id="run-button" /> Delete this person removes only that person. Run cleanup now removes at most 50 people.</label>
+      <label class="check"><input type="checkbox" data-id="restore-button" /> Restore (one person) and Restore this run put people back, and the row then shows Restored.</label>
       <label class="check"><input type="checkbox" data-id="policy-delete" /> After a run for one person, their Deletion cause reads Information and Records Management policy.</label>
       <label class="check"><input type="checkbox" data-id="no-unarchive" /> Unarchiving that person is refused, with the policy message.</label>
       <label class="check"><input type="checkbox" data-id="iosh-hidden" /> Their IOSH certificate is on the certificates Deleted tab, and the PDF is still in storage.</label>
       <label class="check"><input type="checkbox" data-id="revert" /> After revert, the person is back as before, including their IOSH certificate.</label>
       <label class="check"><input type="checkbox" data-id="legacy" /> The legacy database has no changes for those people.</label>
-      <label class="check"><input type="checkbox" data-id="off" /> With <code>RECORDS_POLICY_ENABLED=false</code>, the run deletes nothing. With <code>RECORDS_POLICY_MODE=live</code>, it refuses to start.</label>
+      <label class="check"><input type="checkbox" data-id="off" /> With <code>RECORDS_POLICY_ENABLED=false</code>, Run cleanup now is greyed out and the API refuses it. With <code>RECORDS_POLICY_MODE=live</code>, it refuses to start.</label>
       <label class="check"><input type="checkbox" data-id="notice" /> The notify command emails IW admins a summary, and owners get nothing while owner emails are off.</label>
     </section>
 
@@ -266,7 +299,8 @@ php artisan compliance:records-policy-revert --run=&lt;run id&gt;</pre></li>
         <tr><td>Emails</td><td><code>app/Notifications/RecordsPolicyNoticeNotification.php</code>, <code>RecordsPolicyAdminSummaryNotification.php</code>, <code>app/Services/RecordsPolicy/RecordsPolicyRecipients.php</code></td></tr>
         <tr><td>Unarchive guard</td><td><code>UnarchiveOrganisationUsers.php</code>, <code>AdminRestoreUser.php</code>, <code>AdminUserArchiveController.php</code>, <code>app/Exceptions/UserDeletedException.php</code></td></tr>
         <tr><td>Reports and grid</td><td><code>SharedUserColumns.php</code>, <code>UsersDataset.php</code>, <code>UserResource.php</code>, <code>client/…/Admin/UserGrid/Columns.js</code></td></tr>
-        <tr><td>Tests</td><td><code>tests/Feature/Lifecycle/RecordsPolicyTest.php</code> (21 tests)</td></tr>
+        <tr><td>Admin page</td><td><code>app/Http/Controllers/Admin/AdminRecordsPolicyController.php</code>, <code>app/Services/RecordsPolicy/RecordsPolicyCleanup.php</code>, routes in <code>routes/admin.php</code>, <code>client/src/app/admin/users/records-policy/page.js</code>, <code>client/…/templates/admin/users/RecordsPolicyPanel.js</code>, More menu in <code>client/…/Admin/UserGrid/DataTable.js</code></td></tr>
+        <tr><td>Tests</td><td><code>tests/Feature/Lifecycle/RecordsPolicyTest.php</code> (25 tests)</td></tr>
       </table>
     </section>
 
